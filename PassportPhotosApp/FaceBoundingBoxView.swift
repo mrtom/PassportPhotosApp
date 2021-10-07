@@ -32,24 +32,30 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct FaceBoundingBoxView: View {
   @ObservedObject private(set) var model: CameraViewModel
 
-  init(model: CameraViewModel) {
-    self.model = model
-  }
-
   var body: some View {
-    ZStack {
-      CameraView(model: model)
-      FaceBoundingBoxView(model: model)
-      DebugView(model: model)
+    switch model.faceGeometryState {
+    case .faceNotFound:
+      Rectangle().fill(Color.clear)
+    case .faceFound(let faceGeometryModel):
+      Rectangle()
+        .path(in: CGRect(
+          x: faceGeometryModel.boundingBox.origin.x,
+          y: faceGeometryModel.boundingBox.origin.y,
+          width: faceGeometryModel.boundingBox.width,
+          height: faceGeometryModel.boundingBox.height
+        ))
+        .stroke(Color.red, lineWidth: 2.0)
+    case .errored(_):
+      Rectangle().fill(Color.clear)
     }
   }
 }
 
-struct ContentView_Previews: PreviewProvider {
+struct FaceBoundingBoxView_Previews: PreviewProvider {
   static var previews: some View {
-    ContentView(model: CameraViewModel())
+    FaceBoundingBoxView(model: CameraViewModel())
   }
 }

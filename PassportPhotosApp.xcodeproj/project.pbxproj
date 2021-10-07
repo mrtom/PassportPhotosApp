@@ -12,6 +12,11 @@
 		18D775C722AD944400AE281E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18D775C622AD944400AE281E /* Assets.xcassets */; };
 		18D775CA22AD944400AE281E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18D775C922AD944400AE281E /* Preview Assets.xcassets */; };
 		18D775D822AD963800AE281E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18D775DA22AD963800AE281E /* LaunchScreen.storyboard */; };
+		E269537F270F86B7002BA294 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E269537E270F86B7002BA294 /* CameraView.swift */; };
+		E2695382270F9061002BA294 /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2695381270F9061002BA294 /* CameraViewModel.swift */; };
+		E2695384270F9225002BA294 /* FaceObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2695383270F9225002BA294 /* FaceObservation.swift */; };
+		E2695386270F9810002BA294 /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2695385270F9810002BA294 /* DebugView.swift */; };
+		E2695388270F9B63002BA294 /* FaceBoundingBoxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2695387270F9B63002BA294 /* FaceBoundingBoxView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +27,11 @@
 		18D775C922AD944400AE281E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		18D775CE22AD944400AE281E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		18D775DE22AD96B400AE281E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		E269537E270F86B7002BA294 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		E2695381270F9061002BA294 /* CameraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
+		E2695383270F9225002BA294 /* FaceObservation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceObservation.swift; sourceTree = "<group>"; };
+		E2695385270F9810002BA294 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
+		E2695387270F9B63002BA294 /* FaceBoundingBoxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceBoundingBoxView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +68,11 @@
 			children = (
 				1839F4AF25190F2A00BB00F1 /* AppMain.swift */,
 				18D775C422AD944300AE281E /* ContentView.swift */,
+				E269537E270F86B7002BA294 /* CameraView.swift */,
+				E2695381270F9061002BA294 /* CameraViewModel.swift */,
+				E2695385270F9810002BA294 /* DebugView.swift */,
+				E2695387270F9B63002BA294 /* FaceBoundingBoxView.swift */,
+				E2695383270F9225002BA294 /* FaceObservation.swift */,
 				18D775C622AD944400AE281E /* Assets.xcassets */,
 				18D775DA22AD963800AE281E /* LaunchScreen.storyboard */,
 				18D775CE22AD944400AE281E /* Info.plist */,
@@ -167,8 +182,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E269537F270F86B7002BA294 /* CameraView.swift in Sources */,
 				18D775C522AD944300AE281E /* ContentView.swift in Sources */,
 				1839F4B025190F2A00BB00F1 /* AppMain.swift in Sources */,
+				E2695386270F9810002BA294 /* DebugView.swift in Sources */,
+				E2695384270F9225002BA294 /* FaceObservation.swift in Sources */,
+				E2695388270F9B63002BA294 /* FaceBoundingBoxView.swift in Sources */,
+				E2695382270F9061002BA294 /* CameraViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -311,6 +331,7 @@
 				DEVELOPMENT_TEAM = UN4B24NH95;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = PassportPhotosApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -331,6 +352,7 @@
 				DEVELOPMENT_TEAM = UN4B24NH95;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = PassportPhotosApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

@@ -32,24 +32,23 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct DebugView: View {
   @ObservedObject private(set) var model: CameraViewModel
 
-  init(model: CameraViewModel) {
-    self.model = model
-  }
-
   var body: some View {
-    ZStack {
-      CameraView(model: model)
-      FaceBoundingBoxView(model: model)
-      DebugView(model: model)
+    switch model.faceGeometryState {
+    case .faceNotFound:
+      Text("Look at the camera!")
+    case .faceFound(_):
+      Text("")
+    case .errored(let error):
+      Text("ERROR: \(error.localizedDescription)")
     }
   }
 }
 
-struct ContentView_Previews: PreviewProvider {
+struct DebugView_Previews: PreviewProvider {
   static var previews: some View {
-    ContentView(model: CameraViewModel())
+    DebugView(model: CameraViewModel())
   }
 }
