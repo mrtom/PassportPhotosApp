@@ -140,15 +140,14 @@ extension CameraViewController {
 
 extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
   func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-    // 1
     guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
       return
     }
 
-    // 2
-    let detectFaceRequest = VNDetectFaceLandmarksRequest(completionHandler: detectedFace)
+    // let detectFaceRequest = VNDetectFaceLandmarksRequest(completionHandler: detectedFace)
+    let detectFaceRequest = VNDetectFaceRectanglesRequest(completionHandler: detectedFace)
+    detectFaceRequest.revision = VNDetectFaceRectanglesRequestRevision3
 
-    // 3
     do {
       try sequenceHandler.perform(
         [detectFaceRequest],
@@ -173,7 +172,10 @@ extension CameraViewController {
     }
 
     let faceObservationModel = FaceGeometryModel(
-      boundingBox: convert(rect: result.boundingBox)
+      boundingBox: convert(rect: result.boundingBox),
+      roll: result.roll ?? 0,
+      pitch: result.pitch ?? 0,
+      yaw: result.yaw ?? 0
     )
 
     model.perform(action: .faceObservationDetected(faceObservationModel))

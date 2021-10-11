@@ -32,30 +32,51 @@
 
 import SwiftUI
 
-struct FaceBoundingBoxView: View {
-  @ObservedObject private(set) var model: CameraViewModel
+struct LayoutGuideView: View {
+  let layoutGuideFrame: CGRect
+  let hasDetectedValidFace: Bool
+  let faceDetectionState: FaceObservation<FaceDetectionState>
 
   var body: some View {
-    switch model.faceGeometryState {
-    case .faceNotFound:
-      Rectangle().fill(Color.clear)
-    case .faceFound(let faceGeometryModel):
-      Rectangle()
-        .path(in: CGRect(
-          x: faceGeometryModel.boundingBox.origin.x,
-          y: faceGeometryModel.boundingBox.origin.y,
-          width: faceGeometryModel.boundingBox.width,
-          height: faceGeometryModel.boundingBox.height
-        ))
-        .stroke(Color.yellow, lineWidth: 2.0)
-    case .errored(_):
-      Rectangle().fill(Color.clear)
+    VStack {
+      Ellipse()
+        .stroke(hasDetectedValidFace ? Color.green : Color.red)
+        .frame(width: layoutGuideFrame.width, height: layoutGuideFrame.height)
+      Text(faceDetectionStateLabel())
     }
   }
 }
 
-struct FaceBoundingBoxView_Previews: PreviewProvider {
+// MARK: Private instance methods
+
+extension LayoutGuideView {
+  func faceDetectionStateLabel() -> String {
+    switch faceDetectionState {
+    case .faceNotFound:
+      return "Please look at the camera"
+    case .faceFound(let faceDetectionState):
+      switch faceDetectionState {
+      case .detectedFaceJustRight:
+        return ""
+      case .detectedFaceTooSmall:
+        return "Please bring your face closer to the camera"
+      case .detectedFaceTooLarge:
+        return "Please hold the camera further from your face"
+      case .detectedFaceOffCentre:
+        return "Please move your face to the centre of the frame"
+      }
+    case .errored(_):
+      return "An unexpected error occurred"
+    }
+  }
+}
+
+struct LayoutGuideView_Previews: PreviewProvider {
   static var previews: some View {
-    FaceBoundingBoxView(model: CameraViewModel())
+    LayoutGuideView(
+      layoutGuideFrame: CGRect(x: 0, y: 0, width: 200, height: 300),
+      hasDetectedValidFace: true,
+      faceDetectionState: .faceFound(.detectedFaceJustRight)
+    )
   }
 }

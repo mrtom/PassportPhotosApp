@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1839F4B025190F2A00BB00F1 /* AppMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1839F4AF25190F2A00BB00F1 /* AppMain.swift */; };
-		18D775C522AD944300AE281E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D775C422AD944300AE281E /* ContentView.swift */; };
+		18D775C522AD944300AE281E /* PassportPhotosAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D775C422AD944300AE281E /* PassportPhotosAppView.swift */; };
 		18D775C722AD944400AE281E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18D775C622AD944400AE281E /* Assets.xcassets */; };
 		18D775CA22AD944400AE281E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18D775C922AD944400AE281E /* Preview Assets.xcassets */; };
 		18D775D822AD963800AE281E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18D775DA22AD963800AE281E /* LaunchScreen.storyboard */; };
@@ -17,12 +17,16 @@
 		E2695384270F9225002BA294 /* FaceObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2695383270F9225002BA294 /* FaceObservation.swift */; };
 		E2695386270F9810002BA294 /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2695385270F9810002BA294 /* DebugView.swift */; };
 		E2695388270F9B63002BA294 /* FaceBoundingBoxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2695387270F9B63002BA294 /* FaceBoundingBoxView.swift */; };
+		E269538A271020B6002BA294 /* CameraControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2695389271020B6002BA294 /* CameraControlsView.swift */; };
+		E269538C27102426002BA294 /* CameraControlsHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E269538B27102426002BA294 /* CameraControlsHeaderView.swift */; };
+		E269538E27102431002BA294 /* CameraControlsFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E269538D27102430002BA294 /* CameraControlsFooterView.swift */; };
+		E2695390271024AD002BA294 /* LayoutGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E269538F271024AD002BA294 /* LayoutGuideView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		1839F4AF25190F2A00BB00F1 /* AppMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMain.swift; sourceTree = "<group>"; };
 		18D775BD22AD944300AE281E /* PassportPhotosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PassportPhotosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		18D775C422AD944300AE281E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		18D775C422AD944300AE281E /* PassportPhotosAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassportPhotosAppView.swift; sourceTree = "<group>"; };
 		18D775C622AD944400AE281E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		18D775C922AD944400AE281E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		18D775CE22AD944400AE281E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -32,6 +36,10 @@
 		E2695383270F9225002BA294 /* FaceObservation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceObservation.swift; sourceTree = "<group>"; };
 		E2695385270F9810002BA294 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
 		E2695387270F9B63002BA294 /* FaceBoundingBoxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceBoundingBoxView.swift; sourceTree = "<group>"; };
+		E2695389271020B6002BA294 /* CameraControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraControlsView.swift; sourceTree = "<group>"; };
+		E269538B27102426002BA294 /* CameraControlsHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraControlsHeaderView.swift; sourceTree = "<group>"; };
+		E269538D27102430002BA294 /* CameraControlsFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraControlsFooterView.swift; sourceTree = "<group>"; };
+		E269538F271024AD002BA294 /* LayoutGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutGuideView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,12 +75,16 @@
 			isa = PBXGroup;
 			children = (
 				1839F4AF25190F2A00BB00F1 /* AppMain.swift */,
-				18D775C422AD944300AE281E /* ContentView.swift */,
+				E2695389271020B6002BA294 /* CameraControlsView.swift */,
+				E269538D27102430002BA294 /* CameraControlsFooterView.swift */,
+				E269538B27102426002BA294 /* CameraControlsHeaderView.swift */,
 				E269537E270F86B7002BA294 /* CameraView.swift */,
 				E2695381270F9061002BA294 /* CameraViewModel.swift */,
 				E2695385270F9810002BA294 /* DebugView.swift */,
 				E2695387270F9B63002BA294 /* FaceBoundingBoxView.swift */,
 				E2695383270F9225002BA294 /* FaceObservation.swift */,
+				E269538F271024AD002BA294 /* LayoutGuideView.swift */,
+				18D775C422AD944300AE281E /* PassportPhotosAppView.swift */,
 				18D775C622AD944400AE281E /* Assets.xcassets */,
 				18D775DA22AD963800AE281E /* LaunchScreen.storyboard */,
 				18D775CE22AD944400AE281E /* Info.plist */,
@@ -182,12 +194,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E269538C27102426002BA294 /* CameraControlsHeaderView.swift in Sources */,
 				E269537F270F86B7002BA294 /* CameraView.swift in Sources */,
-				18D775C522AD944300AE281E /* ContentView.swift in Sources */,
+				E2695390271024AD002BA294 /* LayoutGuideView.swift in Sources */,
+				18D775C522AD944300AE281E /* PassportPhotosAppView.swift in Sources */,
 				1839F4B025190F2A00BB00F1 /* AppMain.swift in Sources */,
+				E269538A271020B6002BA294 /* CameraControlsView.swift in Sources */,
 				E2695386270F9810002BA294 /* DebugView.swift in Sources */,
 				E2695384270F9225002BA294 /* FaceObservation.swift in Sources */,
 				E2695388270F9B63002BA294 /* FaceBoundingBoxView.swift in Sources */,
+				E269538E27102431002BA294 /* CameraControlsFooterView.swift in Sources */,
 				E2695382270F9061002BA294 /* CameraViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

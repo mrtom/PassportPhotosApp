@@ -32,30 +32,37 @@
 
 import SwiftUI
 
-struct FaceBoundingBoxView: View {
+struct PassportPhotosAppView: View {
   @ObservedObject private(set) var model: CameraViewModel
 
+  init(model: CameraViewModel) {
+    self.model = model
+  }
+
   var body: some View {
-    switch model.faceGeometryState {
-    case .faceNotFound:
-      Rectangle().fill(Color.clear)
-    case .faceFound(let faceGeometryModel):
-      Rectangle()
-        .path(in: CGRect(
-          x: faceGeometryModel.boundingBox.origin.x,
-          y: faceGeometryModel.boundingBox.origin.y,
-          width: faceGeometryModel.boundingBox.width,
-          height: faceGeometryModel.boundingBox.height
-        ))
-        .stroke(Color.yellow, lineWidth: 2.0)
-    case .errored(_):
-      Rectangle().fill(Color.clear)
+    GeometryReader { geo in
+      ZStack {
+        CameraView(model: model)
+        LayoutGuideView(
+          layoutGuideFrame: model.faceLayoutGuideFrame,
+          hasDetectedValidFace: model.hasDetectedValidFace,
+          faceDetectionState: model.faceDetectionState
+        )
+        if model.debugViewEnabled {
+          DebugView(model: model)
+        }
+        CameraControlsView(model: model)
+      }
+      .ignoresSafeArea()
+      .onAppear {
+        model.perform(action: .windowSizeDetected(geo.frame(in: .global)))
+      }
     }
   }
 }
 
-struct FaceBoundingBoxView_Previews: PreviewProvider {
+struct ContentView_Previews: PreviewProvider {
   static var previews: some View {
-    FaceBoundingBoxView(model: CameraViewModel())
+    PassportPhotosAppView(model: CameraViewModel())
   }
 }

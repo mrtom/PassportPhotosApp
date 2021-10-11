@@ -36,13 +36,24 @@ struct DebugView: View {
   @ObservedObject private(set) var model: CameraViewModel
 
   var body: some View {
-    switch model.faceGeometryState {
-    case .faceNotFound:
-      Text("Look at the camera!")
-    case .faceFound(_):
-      Text("")
-    case .errored(let error):
-      Text("ERROR: \(error.localizedDescription)")
+    ZStack {
+      FaceBoundingBoxView(model: model)
+      switch model.faceGeometryState {
+      case .faceNotFound:
+        AnyView(Spacer())
+      case .faceFound(let geometryModel):
+        AnyView(
+          VStack {
+            Text("R: \(geometryModel.roll)")
+            Text("P: \(geometryModel.pitch)")
+            Text("Y: \(geometryModel.yaw)")
+          }
+        )
+      case .errored(let error):
+        AnyView(
+          Text("ERROR: \(error.localizedDescription)")
+        )
+      }
     }
   }
 }

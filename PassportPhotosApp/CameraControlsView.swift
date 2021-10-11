@@ -32,24 +32,23 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct CameraControlsView: View {
   @ObservedObject private(set) var model: CameraViewModel
 
-  init(model: CameraViewModel) {
-    self.model = model
-  }
-
   var body: some View {
-    ZStack {
-      CameraView(model: model)
-      FaceBoundingBoxView(model: model)
-      DebugView(model: model)
+    GeometryReader { geometry in
+      VStack {
+        CameraControlsHeaderView()
+        Spacer()
+          .frame(height: geometry.size.width * 4 / 3)
+        CameraControlsFooterView()
+      }
     }
   }
 }
 
-struct ContentView_Previews: PreviewProvider {
+struct CameraControlsView_Previews: PreviewProvider {
   static var previews: some View {
-    ContentView(model: CameraViewModel())
+    CameraControlsView(model: CameraViewModel())
   }
 }
