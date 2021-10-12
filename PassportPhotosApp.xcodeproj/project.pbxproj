@@ -12,6 +12,8 @@
 		18D775C722AD944400AE281E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18D775C622AD944400AE281E /* Assets.xcassets */; };
 		18D775CA22AD944400AE281E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18D775C922AD944400AE281E /* Preview Assets.xcassets */; };
 		18D775D822AD963800AE281E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18D775DA22AD963800AE281E /* LaunchScreen.storyboard */; };
+		E226A1672715C53200ED4786 /* FaceLayoutGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E226A1662715C53200ED4786 /* FaceLayoutGuideView.swift */; };
+		E226A1692715C76E00ED4786 /* UserInstructionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E226A1682715C76E00ED4786 /* UserInstructionsView.swift */; };
 		E269537F270F86B7002BA294 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E269537E270F86B7002BA294 /* CameraView.swift */; };
 		E2695382270F9061002BA294 /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2695381270F9061002BA294 /* CameraViewModel.swift */; };
 		E2695384270F9225002BA294 /* FaceObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2695383270F9225002BA294 /* FaceObservation.swift */; };
@@ -31,6 +33,8 @@
 		18D775C922AD944400AE281E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		18D775CE22AD944400AE281E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		18D775DE22AD96B400AE281E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		E226A1662715C53200ED4786 /* FaceLayoutGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLayoutGuideView.swift; sourceTree = "<group>"; };
+		E226A1682715C76E00ED4786 /* UserInstructionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInstructionsView.swift; sourceTree = "<group>"; };
 		E269537E270F86B7002BA294 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		E2695381270F9061002BA294 /* CameraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
 		E2695383270F9225002BA294 /* FaceObservation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceObservation.swift; sourceTree = "<group>"; };
@@ -82,9 +86,11 @@
 				E2695381270F9061002BA294 /* CameraViewModel.swift */,
 				E2695385270F9810002BA294 /* DebugView.swift */,
 				E2695387270F9B63002BA294 /* FaceBoundingBoxView.swift */,
+				E226A1662715C53200ED4786 /* FaceLayoutGuideView.swift */,
 				E2695383270F9225002BA294 /* FaceObservation.swift */,
 				E269538F271024AD002BA294 /* LayoutGuideView.swift */,
 				18D775C422AD944300AE281E /* PassportPhotosAppView.swift */,
+				E226A1682715C76E00ED4786 /* UserInstructionsView.swift */,
 				18D775C622AD944400AE281E /* Assets.xcassets */,
 				18D775DA22AD963800AE281E /* LaunchScreen.storyboard */,
 				18D775CE22AD944400AE281E /* Info.plist */,
@@ -195,6 +201,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E269538C27102426002BA294 /* CameraControlsHeaderView.swift in Sources */,
+				E226A1692715C76E00ED4786 /* UserInstructionsView.swift in Sources */,
 				E269537F270F86B7002BA294 /* CameraView.swift in Sources */,
 				E2695390271024AD002BA294 /* LayoutGuideView.swift in Sources */,
 				18D775C522AD944300AE281E /* PassportPhotosAppView.swift in Sources */,
@@ -204,6 +211,7 @@
 				E2695384270F9225002BA294 /* FaceObservation.swift in Sources */,
 				E2695388270F9B63002BA294 /* FaceBoundingBoxView.swift in Sources */,
 				E269538E27102431002BA294 /* CameraControlsFooterView.swift in Sources */,
+				E226A1672715C53200ED4786 /* FaceLayoutGuideView.swift in Sources */,
 				E2695382270F9061002BA294 /* CameraViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -38,6 +38,9 @@ struct DebugView: View {
   var body: some View {
     ZStack {
       FaceBoundingBoxView(model: model)
+      if model.debugViewEnabled {
+        FaceLayoutGuideView(model: model)
+      }
       switch model.faceGeometryState {
       case .faceNotFound:
         AnyView(Spacer())

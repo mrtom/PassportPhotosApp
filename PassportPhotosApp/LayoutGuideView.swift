@@ -35,38 +35,12 @@ import SwiftUI
 struct LayoutGuideView: View {
   let layoutGuideFrame: CGRect
   let hasDetectedValidFace: Bool
-  let faceDetectionState: FaceObservation<FaceDetectionState>
 
   var body: some View {
     VStack {
       Ellipse()
         .stroke(hasDetectedValidFace ? Color.green : Color.red)
         .frame(width: layoutGuideFrame.width, height: layoutGuideFrame.height)
-      Text(faceDetectionStateLabel())
-    }
-  }
-}
-
-// MARK: Private instance methods
-
-extension LayoutGuideView {
-  func faceDetectionStateLabel() -> String {
-    switch faceDetectionState {
-    case .faceNotFound:
-      return "Please look at the camera"
-    case .faceFound(let faceDetectionState):
-      switch faceDetectionState {
-      case .detectedFaceJustRight:
-        return ""
-      case .detectedFaceTooSmall:
-        return "Please bring your face closer to the camera"
-      case .detectedFaceTooLarge:
-        return "Please hold the camera further from your face"
-      case .detectedFaceOffCentre:
-        return "Please move your face to the centre of the frame"
-      }
-    case .errored(_):
-      return "An unexpected error occurred"
     }
   }
 }
@@ -75,8 +49,7 @@ struct LayoutGuideView_Previews: PreviewProvider {
   static var previews: some View {
     LayoutGuideView(
       layoutGuideFrame: CGRect(x: 0, y: 0, width: 200, height: 300),
-      hasDetectedValidFace: true,
-      faceDetectionState: .faceFound(.detectedFaceJustRight)
+      hasDetectedValidFace: true
     )
   }
 }

@@ -32,23 +32,43 @@
 
 import SwiftUI
 
-struct CameraControlsView: View {
-  @ObservedObject private(set) var model: CameraViewModel
+struct UserInstructionsView: View {
+  let faceDetectionState: FaceObservation<FaceDetectionState>
 
   var body: some View {
-    GeometryReader { geometry in
-      VStack {
-        CameraControlsHeaderView(model: model)
-        Spacer()
-          .frame(height: geometry.size.width * 4 / 3)
-        CameraControlsFooterView()
+    Text(faceDetectionStateLabel())
+      .font(.title)
+  }
+}
+
+// MARK: Private instance methods
+
+extension UserInstructionsView {
+  func faceDetectionStateLabel() -> String {
+    switch faceDetectionState {
+    case .faceNotFound:
+      return "Please look at the camera"
+    case .faceFound(let faceDetectionState):
+      switch faceDetectionState {
+      case .detectedFaceJustRight:
+        return "Please take your photo :]"
+      case .detectedFaceTooSmall:
+        return "Please bring your face closer to the camera"
+      case .detectedFaceTooLarge:
+        return "Please hold the camera further from your face"
+      case .detectedFaceOffCentre:
+        return "Please move your face to the centre of the frame"
       }
+    case .errored(_):
+      return "An unexpected error occurred"
     }
   }
 }
 
-struct CameraControlsView_Previews: PreviewProvider {
+struct UserInstructionsView_Previews: PreviewProvider {
   static var previews: some View {
-    CameraControlsView(model: CameraViewModel())
+    UserInstructionsView(
+      faceDetectionState: .faceFound(.detectedFaceJustRight)
+    )
   }
 }

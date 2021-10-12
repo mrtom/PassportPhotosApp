@@ -33,14 +33,19 @@
 import SwiftUI
 
 struct CameraControlsHeaderView: View {
+  @ObservedObject var model: CameraViewModel
+
   var body: some View {
-    Rectangle()
-      .fill(Color.black.opacity(0.8))
+    ZStack {
+      Rectangle()
+        .fill(Color.black.opacity(0.8))
+      UserInstructionsView(faceDetectionState: model.faceDetectionState)
+    }
   }
 }
 
 struct CameraControlsHeaderView_Previews: PreviewProvider {
   static var previews: some View {
-    CameraControlsHeaderView()
+    CameraControlsHeaderView(model: CameraViewModel())
   }
 }

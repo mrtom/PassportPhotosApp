@@ -112,6 +112,7 @@ final class CameraViewModel: ObservableObject {
   // MARK: Action handlers
 
   private func handleWindowSizeChanged(toRect: CGRect) {
+    print(toRect)
     faceLayoutGuideFrame = CGRect(
       x: toRect.midX - faceLayoutGuideFrame.width / 2,
       y: toRect.midY - faceLayoutGuideFrame.height / 2,
