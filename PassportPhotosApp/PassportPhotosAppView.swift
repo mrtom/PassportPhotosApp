@@ -47,7 +47,7 @@ struct PassportPhotosAppView: View {
           layoutGuideFrame: model.faceLayoutGuideFrame,
           hasDetectedValidFace: model.hasDetectedValidFace
         )
-        if model.debugViewEnabled {
+        if model.debugModeEnabled {
           DebugView(model: model)
         }
         CameraControlsView(model: model)

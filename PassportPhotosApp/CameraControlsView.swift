@@ -41,7 +41,7 @@ struct CameraControlsView: View {
         CameraControlsHeaderView(model: model)
         Spacer()
           .frame(height: geometry.size.width * 4 / 3)
-        CameraControlsFooterView()
+        CameraControlsFooterView(model: model)
       }
     }
   }

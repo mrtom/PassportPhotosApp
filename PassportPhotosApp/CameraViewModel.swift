@@ -36,9 +36,16 @@ import Foundation
 import Vision
 
 enum CameraViewModelAction {
+  // View setup and configuration actions
   case windowSizeDetected(CGRect)
+
+  // Face detection actions
   case noFaceDetected
   case faceObservationDetected(FaceGeometryModel)
+  case faceQualityObservationDetected(FaceQualityModel)
+
+  // Other
+  case toggleDebugMode
 }
 
 enum FaceDetectionState {
@@ -55,12 +62,15 @@ struct FaceGeometryModel {
   let yaw: NSNumber
 }
 
-final class CameraViewModel: ObservableObject {
-  var cancellable: AnyCancellable? // TODO: Set called subscriptions?
+struct FaceQualityModel {
+  let quality: Float
+}
 
+final class CameraViewModel: ObservableObject {
   // MARK: - Publishers
   @Published var faceGeometryState: FaceObservation<FaceGeometryModel>
-  @Published var debugViewEnabled: Bool
+  @Published var faceQualityState: FaceObservation<FaceQualityModel>
+  @Published var debugModeEnabled: Bool
   @Published var hasDetectedValidFace: Bool
   @Published var faceDetectionState: FaceObservation<FaceDetectionState> {
     didSet {
@@ -87,12 +97,13 @@ final class CameraViewModel: ObservableObject {
   init() {
     hasDetectedValidFace = false
     faceGeometryState = .faceNotFound
+    faceQualityState = .faceNotFound
     faceDetectionState = .faceNotFound
 
     #if DEBUG
-      debugViewEnabled = true
+      debugModeEnabled = true
     #else
-      debugViewEnabled = false
+      debugModeEnabled = false
     #endif
   }
 
@@ -106,6 +117,10 @@ final class CameraViewModel: ObservableObject {
       publishNoFaceObserved()
     case .faceObservationDetected(let faceObservation):
       publishFaceObservation(faceObservation)
+    case .faceQualityObservationDetected(let faceQualityObservation):
+      publishFaceQualityObservation(faceQualityObservation)
+    case .toggleDebugMode:
+      toggleDebugMode()
     }
   }
 
@@ -135,30 +150,16 @@ final class CameraViewModel: ObservableObject {
         calculateDetectedFaceValidity(boundingBox: faceGeometryModel.boundingBox)
       )
     }
-//    self.cancellable = tubeLinesStatusFetcher.fetchStatus()
-//      .sink(receiveCompletion: asyncCompletionErrorHandler) { allLinesStatus in
-//        DispatchQueue.main.async { [self] in
-//          let lastUpdatedDisplayValue: String
-//          if let updatedDate = allLinesStatus.lastUpdated {
-//            lastUpdatedDisplayValue = dateFormatter.string(from: updatedDate)
-//          } else {
-//            lastUpdatedDisplayValue = "Unknown"
-//          }
-//
-//          tubeStatusState = .loaded(
-//            TubeStatusModel(
-//              lastUpdated: "Last Updated: \(lastUpdatedDisplayValue)",
-//              linesStatus: allLinesStatus.linesStatus.compactMap {
-//                LineStatusModel(
-//                  id: $0.line.name,
-//                  displayName: $0.line.name,
-//                  status: $0.status,
-//                  color: $0.line.color
-//                )
-//              })
-//          )
-//        }
-//      }
+  }
+
+  private func publishFaceQualityObservation(_ faceQualityModel: FaceQualityModel) {
+    DispatchQueue.main.async { [self] in
+      faceQualityState = .faceFound(faceQualityModel)
+    }
+  }
+
+  private func toggleDebugMode() {
+    debugModeEnabled.toggle()
   }
 }
 

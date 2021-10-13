@@ -38,26 +38,59 @@ struct DebugView: View {
   var body: some View {
     ZStack {
       FaceBoundingBoxView(model: model)
-      if model.debugViewEnabled {
-        FaceLayoutGuideView(model: model)
+      FaceLayoutGuideView(model: model)
+      VStack(alignment: .leading, spacing: 5) {
+        DebugSection(observation: model.faceGeometryState) { geometryModel in
+          DebugText("R: \(geometryModel.roll)")
+          DebugText("P: \(geometryModel.pitch)")
+          DebugText("Y: \(geometryModel.yaw)")
+        }
+        DebugSection(observation: model.faceQualityState) { qualityModel in
+          DebugText("Q: \(qualityModel.quality)")
+        }
       }
-      switch model.faceGeometryState {
-      case .faceNotFound:
-        AnyView(Spacer())
-      case .faceFound(let geometryModel):
-        AnyView(
-          VStack {
-            Text("R: \(geometryModel.roll)")
-            Text("P: \(geometryModel.pitch)")
-            Text("Y: \(geometryModel.yaw)")
-          }
-        )
-      case .errored(let error):
-        AnyView(
-          Text("ERROR: \(error.localizedDescription)")
-        )
-      }
+      .frame(maxWidth: .infinity, alignment: .leading)
     }
+  }
+}
+
+struct DebugSection<Model, Content: View>: View {
+  let observation: FaceObservation<Model>
+  let content: (Model) -> Content
+
+  public init(
+    observation: FaceObservation<Model>,
+    @ViewBuilder content: @escaping (Model) -> Content
+  ) {
+    self.observation = observation
+    self.content = content
+  }
+
+  var body: some View {
+    switch observation {
+    case .faceNotFound:
+      AnyView(Spacer())
+    case .faceFound(let model):
+      AnyView(content(model))
+    case .errored(let error):
+      AnyView(
+        DebugText("ERROR: \(error.localizedDescription)")
+      )
+    }
+  }
+}
+
+struct DebugText: View {
+  let content: String
+
+  @inlinable
+  public init(_ content: String) {
+    self.content = content
+  }
+
+  var body: some View {
+    Text(content)
+      .frame(maxWidth: .infinity, alignment: .leading)
   }
 }
 

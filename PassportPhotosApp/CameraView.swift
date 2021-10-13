@@ -148,9 +148,12 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     let detectFaceRequest = VNDetectFaceRectanglesRequest(completionHandler: detectedFace)
     detectFaceRequest.revision = VNDetectFaceRectanglesRequestRevision3
 
+    let detectCaptureQualityRequest = VNDetectFaceCaptureQualityRequest(completionHandler: detectedFaceQualityRequest)
+    detectCaptureQualityRequest.revision = VNDetectFaceCaptureQualityRequestRevision2
+
     do {
       try sequenceHandler.perform(
-        [detectFaceRequest],
+        [detectFaceRequest, detectCaptureQualityRequest],
         on: imageBuffer,
         orientation: .leftMirrored)
     } catch {
@@ -179,6 +182,22 @@ extension CameraViewController {
     )
 
     model.perform(action: .faceObservationDetected(faceObservationModel))
+  }
+
+  func detectedFaceQualityRequest(request: VNRequest, error: Error?) {
+    guard
+      let results = request.results as? [VNFaceObservation],
+      let result = results.first
+    else {
+      model.perform(action: .noFaceDetected)
+      return
+    }
+
+    let faceQualityModel = FaceQualityModel(
+      quality: result.faceCaptureQuality ?? 0
+    )
+
+    model.perform(action: .faceQualityObservationDetected(faceQualityModel))
   }
 
   func convert(rect: CGRect) -> CGRect {

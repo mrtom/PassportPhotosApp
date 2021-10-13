@@ -33,13 +33,41 @@
 import SwiftUI
 
 struct CameraControlsFooterView: View {
+  @ObservedObject var model: CameraViewModel
+
   var body: some View {
-    Rectangle().fill(Color.black.opacity(0.8))
+    ZStack {
+      Rectangle()
+        .fill(Color.black.opacity(0.8))
+      HStack(spacing: 20) {
+        Spacer()
+        Button(action: {
+          model.perform(action: .toggleDebugMode)
+        }, label: {
+          FooterIconView(imageName: "ladybug.fill")
+        })
+        .tint(model.debugModeEnabled ? .green : .gray)
+        Spacer()
+        FooterIconView(imageName: "camera.aperture")
+        Spacer()
+        FooterIconView(imageName: "photo.fill.on.rectangle.fill")
+        Spacer()
+      }
+    }
+  }
+
+  struct FooterIconView: View {
+    var imageName: String
+
+    var body: some View {
+      return Image(systemName: imageName)
+        .font(.system(size: 36))
+    }
   }
 }
 
 struct CameraControlsFooterView_Previews: PreviewProvider {
   static var previews: some View {
-    CameraControlsFooterView()
+    CameraControlsFooterView(model: CameraViewModel())
   }
 }
