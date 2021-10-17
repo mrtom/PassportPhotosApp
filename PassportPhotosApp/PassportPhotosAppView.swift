@@ -41,20 +41,22 @@ struct PassportPhotosAppView: View {
 
   var body: some View {
     GeometryReader { geo in
-      ZStack {
-        CameraView(model: model)
-        LayoutGuideView(
-          layoutGuideFrame: model.faceLayoutGuideFrame,
-          hasDetectedValidFace: model.hasDetectedValidFace
-        )
-        if model.debugModeEnabled {
-          DebugView(model: model)
+      NavigationView {
+        ZStack {
+          CameraView(model: model)
+          LayoutGuideView(
+            layoutGuideFrame: model.faceLayoutGuideFrame,
+            hasDetectedValidFace: model.hasDetectedValidFace
+          )
+          if model.debugModeEnabled {
+            DebugView(model: model)
+          }
+          CameraControlsView(model: model)
         }
-        CameraControlsView(model: model)
+        .ignoresSafeArea()
+        .onAppear {
+          model.perform(action: .windowSizeDetected(geo.frame(in: .global)))
       }
-      .ignoresSafeArea()
-      .onAppear {
-        model.perform(action: .windowSizeDetected(geo.frame(in: .global)))
       }
     }
   }
