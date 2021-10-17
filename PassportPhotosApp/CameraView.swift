@@ -144,16 +144,15 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
       return
     }
 
-    // let detectFaceRequest = VNDetectFaceLandmarksRequest(completionHandler: detectedFace)
-    let detectFaceRequest = VNDetectFaceRectanglesRequest(completionHandler: detectedFace)
-    detectFaceRequest.revision = VNDetectFaceRectanglesRequestRevision3
+    let detectFaceLandmarksRequest = VNDetectFaceLandmarksRequest(completionHandler: detectedFaceLandmarks)
+    detectFaceLandmarksRequest.revision = VNDetectFaceLandmarksRequestRevision3
 
     let detectCaptureQualityRequest = VNDetectFaceCaptureQualityRequest(completionHandler: detectedFaceQualityRequest)
     detectCaptureQualityRequest.revision = VNDetectFaceCaptureQualityRequestRevision2
 
     do {
       try sequenceHandler.perform(
-        [detectFaceRequest, detectCaptureQualityRequest],
+        [detectFaceLandmarksRequest, detectCaptureQualityRequest],
         on: imageBuffer,
         orientation: .leftMirrored)
     } catch {
@@ -165,7 +164,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
 // MARK: - Private methods
 
 extension CameraViewController {
-  func detectedFace(request: VNRequest, error: Error?) {
+  func detectedFaceLandmarks(request: VNRequest, error: Error?) {
     guard
       let results = request.results as? [VNFaceObservation],
       let result = results.first
