@@ -33,7 +33,7 @@
 import SwiftUI
 
 struct DebugView: View {
-  @ObservedObject private(set) var model: CameraViewModel
+  @ObservedObject var model: CameraViewModel
 
   var body: some View {
     ZStack {
@@ -42,11 +42,15 @@ struct DebugView: View {
       VStack(alignment: .leading, spacing: 5) {
         DebugSection(observation: model.faceGeometryState) { geometryModel in
           DebugText("R: \(geometryModel.roll)")
+            .debugTextStatus(status: model.isAcceptableRoll ? .passing : .failing)
           DebugText("P: \(geometryModel.pitch)")
+            .debugTextStatus(status: model.isAcceptablePitch ? .passing : .failing)
           DebugText("Y: \(geometryModel.yaw)")
+            .debugTextStatus(status: model.isAcceptableYaw ? .passing : .failing)
         }
         DebugSection(observation: model.faceQualityState) { qualityModel in
           DebugText("Q: \(qualityModel.quality)")
+            .debugTextStatus(status: model.isAcceptableQuality ? .passing : .failing)
         }
       }
       .frame(maxWidth: .infinity, alignment: .leading)
@@ -80,6 +84,12 @@ struct DebugSection<Model, Content: View>: View {
   }
 }
 
+enum DebugTextStatus {
+  case neutral
+  case failing
+  case passing
+}
+
 struct DebugText: View {
   let content: String
 
@@ -91,6 +101,32 @@ struct DebugText: View {
   var body: some View {
     Text(content)
       .frame(maxWidth: .infinity, alignment: .leading)
+  }
+}
+
+struct Status: ViewModifier {
+  let foregroundColor: Color
+
+  func body(content: Content) -> some View {
+    content
+      .foregroundColor(foregroundColor)
+  }
+}
+
+extension DebugText {
+  func colorForStatus(status: DebugTextStatus) -> Color {
+    switch status {
+    case .neutral:
+      return .white
+    case .failing:
+      return .red
+    case .passing:
+      return .green
+    }
+  }
+
+  func debugTextStatus(status: DebugTextStatus) -> some View {
+    self.modifier(Status(foregroundColor: colorForStatus(status: status)))
   }
 }
 

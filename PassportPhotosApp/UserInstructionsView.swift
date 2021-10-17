@@ -33,7 +33,7 @@
 import SwiftUI
 
 struct UserInstructionsView: View {
-  let model: CameraViewModel
+  @ObservedObject var model: CameraViewModel
 
   var body: some View {
     Text(faceDetectionStateLabel())

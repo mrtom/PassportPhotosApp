@@ -254,13 +254,13 @@ extension CameraViewModel {
       isAcceptableRoll = false
     }
 
-    if abs(CGFloat(pitch)) < 0.1 {
+    if abs(CGFloat(pitch)) < 0.2 {
       isAcceptablePitch = true
     } else {
       isAcceptablePitch = false
     }
 
-    if abs(CGFloat(yaw)) < 0.1 {
+    if abs(CGFloat(yaw)) < 0.15 {
       isAcceptableYaw = true
     } else {
       isAcceptableYaw = false
