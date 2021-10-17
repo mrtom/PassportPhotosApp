@@ -59,6 +59,7 @@ final class CameraViewController: UIViewController {
 
   var sequenceHandler = VNSequenceRequestHandler()
   var previewLayer: AVCaptureVideoPreviewLayer?
+  var isCapturingPhoto = false
 
   let session = AVCaptureSession()
 
@@ -75,19 +76,16 @@ final class CameraViewController: UIViewController {
     label: "video data queue",
     qos: .userInitiated,
     attributes: [],
-    autoreleaseFrequency: .workItem)
-
-  var maxX: CGFloat = 0.0
-  var midY: CGFloat = 0.0
-  var maxY: CGFloat = 0.0
+    autoreleaseFrequency: .workItem
+  )
 
   override func viewDidLoad() {
     super.viewDidLoad()
     configureCaptureSession()
 
-    maxX = view.bounds.maxX
-    midY = view.bounds.midY
-    maxY = view.bounds.maxY
+    model.onShutterClick = { [weak self] in
+      self?.isCapturingPhoto = true
+    }
 
     session.startRunning()
   }
@@ -128,7 +126,7 @@ extension CameraViewController {
 
     // Configure the preview layer
     previewLayer = AVCaptureVideoPreviewLayer(session: session)
-    previewLayer?.videoGravity = .resizeAspectFill
+    previewLayer?.videoGravity = .resizeAspect
     previewLayer?.frame = view.bounds
     if let previewLayer = previewLayer {
       view.layer.insertSublayer(previewLayer, at: 0)
@@ -144,15 +142,21 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
       return
     }
 
-    let detectFaceLandmarksRequest = VNDetectFaceLandmarksRequest(completionHandler: detectedFaceLandmarks)
-    detectFaceLandmarksRequest.revision = VNDetectFaceLandmarksRequestRevision3
+    if isCapturingPhoto {
+      isCapturingPhoto = false
+
+      savePassportPhoto(from: imageBuffer)
+    }
+
+    let detectFaceRectanglesRequest = VNDetectFaceRectanglesRequest(completionHandler: detectedFaceRectangles)
+    detectFaceRectanglesRequest.revision = VNDetectFaceRectanglesRequestRevision3
 
     let detectCaptureQualityRequest = VNDetectFaceCaptureQualityRequest(completionHandler: detectedFaceQualityRequest)
     detectCaptureQualityRequest.revision = VNDetectFaceCaptureQualityRequestRevision2
 
     do {
       try sequenceHandler.perform(
-        [detectFaceLandmarksRequest, detectCaptureQualityRequest],
+        [detectFaceRectanglesRequest, detectCaptureQualityRequest],
         on: imageBuffer,
         orientation: .leftMirrored)
     } catch {
@@ -164,7 +168,7 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
 // MARK: - Private methods
 
 extension CameraViewController {
-  func detectedFaceLandmarks(request: VNRequest, error: Error?) {
+  func detectedFaceRectangles(request: VNRequest, error: Error?) {
     guard
       let results = request.results as? [VNFaceObservation],
       let result = results.first
@@ -205,5 +209,23 @@ extension CameraViewController {
     }
 
     return previewLayer.layerRectConverted(fromMetadataOutputRect: rect)
+  }
+
+  func savePassportPhoto(from pixelBuffer: CVPixelBuffer) {
+    let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+    let coreImageWidth = ciImage.extent.width
+    let coreImageHeight = ciImage.extent.height
+
+    let desiredImageHeight = coreImageWidth * 4 / 3
+
+    // Calculate frame of photo
+    let yOrigin = (coreImageHeight - desiredImageHeight) / 2
+    let photoRect = CGRect(x: 0, y: yOrigin, width: coreImageWidth, height: desiredImageHeight)
+
+    let context = CIContext()
+    if let cgImage = context.createCGImage(ciImage, from: photoRect) {
+      let passportPhoto = UIImage(cgImage: cgImage, scale: 1, orientation: .upMirrored)
+      model.perform(action: .savePhoto(passportPhoto))
+    }
   }
 }

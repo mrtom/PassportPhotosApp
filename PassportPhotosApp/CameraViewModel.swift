@@ -33,6 +33,7 @@
 import Combine
 import CoreGraphics
 import Foundation
+import UIKit
 import Vision
 
 enum CameraViewModelAction {
@@ -46,6 +47,8 @@ enum CameraViewModelAction {
 
   // Other
   case toggleDebugMode
+  case takePhoto
+  case savePhoto(UIImage)
 }
 
 enum FaceDetectedState {
@@ -104,6 +107,7 @@ final class CameraViewModel: ObservableObject {
       calculateDetectedFaceValidity()
     }
   }
+  @Published private(set) var passportPhoto: UIImage?
 
   // MARK: - Publishers of Vision data directly
   @Published private(set) var faceDetectedState: FaceDetectedState
@@ -119,11 +123,11 @@ final class CameraViewModel: ObservableObject {
     }
   }
 
+  // MARK: - UIKit Actions
+  var onShutterClick: (() -> Void)?
+
   // MARK: - Private variables
   var faceLayoutGuideFrame = CGRect(x: 0, y: 0, width: 200, height: 300)
-
-  // MARK: - Vision framework state
-
 
   init() {
     faceDetectedState = .noFaceDetected
@@ -159,13 +163,16 @@ final class CameraViewModel: ObservableObject {
       publishFaceQualityObservation(faceQualityObservation)
     case .toggleDebugMode:
       toggleDebugMode()
+    case .takePhoto:
+      takePhoto()
+    case .savePhoto(let image):
+      savePhoto(image)
     }
   }
 
   // MARK: Action handlers
 
   private func handleWindowSizeChanged(toRect: CGRect) {
-    print(toRect)
     faceLayoutGuideFrame = CGRect(
       x: toRect.midX - faceLayoutGuideFrame.width / 2,
       y: toRect.midY - faceLayoutGuideFrame.height / 2,
@@ -198,6 +205,19 @@ final class CameraViewModel: ObservableObject {
 
   private func toggleDebugMode() {
     debugModeEnabled.toggle()
+  }
+
+  private func takePhoto() {
+    if let onShutterClick = onShutterClick {
+      onShutterClick()
+    }
+  }
+
+  private func savePhoto(_ photo: UIImage) {
+    UIImageWriteToSavedPhotosAlbum(photo, nil, nil, nil)
+    DispatchQueue.main.async { [self] in
+      passportPhoto = photo
+    }
   }
 }
 

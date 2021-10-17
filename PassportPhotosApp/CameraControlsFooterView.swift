@@ -48,9 +48,25 @@ struct CameraControlsFooterView: View {
         })
         .tint(model.debugModeEnabled ? .green : .gray)
         Spacer()
-        FooterIconView(imageName: "camera.aperture")
+        Button(action: {
+          model.perform(action: .takePhoto)
+        }, label: {
+          FooterIconView(imageName: "camera.aperture")
+        })
+          .disabled(model.hasDetectedValidFace ? false : true)
+          .tint(.white)
         Spacer()
-        FooterIconView(imageName: "photo.fill.on.rectangle.fill")
+        if let photo = model.passportPhoto {
+          Button(action: {
+            print("TODO: Navigate")
+          }, label: {
+            Image(uiImage: photo)
+              .resizable()
+              .frame(width: 45.0, height: 60.0)
+          })
+        } else {
+          FooterIconView(imageName: "photo.fill.on.rectangle.fill")
+        }
         Spacer()
       }
     }
