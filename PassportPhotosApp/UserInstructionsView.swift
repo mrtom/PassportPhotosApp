@@ -58,6 +58,10 @@ extension UserInstructionsView {
         return "Please hold the camera further from your face"
       case .detectedFaceOffCentre:
         return "Please move your face to the centre of the frame"
+      case .detectedFaceNotFacingForward:
+        return "Please look straight at the camera"
+      case .detectedFaceQualityTooLow:
+        return "Image quality too low"
       }
     case .errored(_):
       return "An unexpected error occurred"

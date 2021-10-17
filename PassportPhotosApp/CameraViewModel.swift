@@ -52,6 +52,8 @@ enum FaceDetectionState {
   case detectedFaceTooSmall
   case detectedFaceTooLarge
   case detectedFaceOffCentre
+  case detectedFaceQualityTooLow
+  case detectedFaceNotFacingForward
   case detectedFaceJustRight
 }
 
@@ -68,10 +70,19 @@ struct FaceQualityModel {
 
 final class CameraViewModel: ObservableObject {
   // MARK: - Publishers
-  @Published var faceGeometryState: FaceObservation<FaceGeometryModel>
-  @Published var faceQualityState: FaceObservation<FaceQualityModel>
   @Published var debugModeEnabled: Bool
   @Published var hasDetectedValidFace: Bool
+  @Published var faceGeometryState: FaceObservation<FaceGeometryModel> {
+    didSet {
+      faceDetectionState = calculateDetectedFaceValidity()
+    }
+  }
+
+  @Published var faceQualityState: FaceObservation<FaceQualityModel> {
+    didSet {
+      faceDetectionState = calculateDetectedFaceValidity()
+    }
+  }
   @Published var faceDetectionState: FaceObservation<FaceDetectionState> {
     didSet {
       // Update `hasDetectedValidFace` shortcut value
@@ -139,6 +150,7 @@ final class CameraViewModel: ObservableObject {
   private func publishNoFaceObserved() {
     DispatchQueue.main.async { [self] in
       faceGeometryState = .faceNotFound
+      faceQualityState = .faceNotFound
       faceDetectionState = .faceNotFound
     }
   }
@@ -146,9 +158,6 @@ final class CameraViewModel: ObservableObject {
   private func publishFaceObservation(_ faceGeometryModel: FaceGeometryModel) {
     DispatchQueue.main.async { [self] in
       faceGeometryState = .faceFound(faceGeometryModel)
-      faceDetectionState = .faceFound(
-        calculateDetectedFaceValidity(boundingBox: faceGeometryModel.boundingBox)
-      )
     }
   }
 
@@ -166,21 +175,54 @@ final class CameraViewModel: ObservableObject {
 // MARK: Private instance methods
 
 extension CameraViewModel {
-  func calculateDetectedFaceValidity(boundingBox: CGRect) -> FaceDetectionState {
-    // First, check face is roughly the same size as the layout guide
-    if boundingBox.width > 1.2 * faceLayoutGuideFrame.width {
-      return .detectedFaceTooLarge
-    } else if boundingBox.width * 1.2 < faceLayoutGuideFrame.width {
-      return .detectedFaceTooSmall
+  func calculateDetectedFaceValidity() -> FaceObservation<FaceDetectionState> {
+    // First, check if the geometry is correct
+    switch faceGeometryState {
+    case .faceNotFound:
+      return .faceNotFound
+    case .errored(let error):
+      return .errored(error)
+    case .faceFound(let faceGeometryModel):
+      // First, check face is roughly the same size as the layout guide
+      let boundingBox = faceGeometryModel.boundingBox
+      if boundingBox.width > 1.2 * faceLayoutGuideFrame.width {
+        return .faceFound(.detectedFaceTooLarge)
+      } else if boundingBox.width * 1.2 < faceLayoutGuideFrame.width {
+        return .faceFound(.detectedFaceTooSmall)
+      }
+
+      // Next, check face is roughly centered in the frame
+      if abs(boundingBox.midX - faceLayoutGuideFrame.midX) > 50 {
+        return .faceFound(.detectedFaceOffCentre)
+      } else if abs(boundingBox.midY - faceLayoutGuideFrame.midY) > 50 {
+        return .faceFound(.detectedFaceOffCentre)
+      }
+
+      if faceGeometryModel.roll.doubleValue < 1.2 || faceGeometryModel.roll.doubleValue > 1.6 {
+        return .faceFound(.detectedFaceNotFacingForward)
+      }
+
+      if abs(CGFloat(faceGeometryModel.pitch.doubleValue)) > 0.1 {
+        return .faceFound(.detectedFaceNotFacingForward)
+      }
+
+      if abs(CGFloat(faceGeometryModel.yaw.doubleValue)) > 0.1 {
+        return .faceFound(.detectedFaceNotFacingForward)
+      }
     }
 
-    // Next, check face is roughly centered in the frame
-    if abs(boundingBox.midX - faceLayoutGuideFrame.midX) > 50 {
-      return .detectedFaceOffCentre
-    } else if abs(boundingBox.midY - faceLayoutGuideFrame.midY) > 50 {
-      return .detectedFaceOffCentre
-    }
+    // Next, check quality
+    switch faceQualityState {
+    case .faceNotFound:
+      return .faceNotFound
+    case .errored(let error):
+      return .errored(error)
+    case .faceFound(let faceQualityModel):
+      if faceQualityModel.quality < 0.2 {
+        return .faceFound(.detectedFaceQualityTooLow)
+      }
 
-    return .detectedFaceJustRight
+      return .faceFound(.detectedFaceJustRight)
+    }
   }
 }
