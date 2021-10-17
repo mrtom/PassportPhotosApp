@@ -48,13 +48,18 @@ enum CameraViewModelAction {
   case toggleDebugMode
 }
 
-enum FaceDetectionState {
+enum FaceDetectedState {
+  case faceDetected
+  case noFaceDetected
+  case faceDetectionErrored
+}
+
+enum FaceBoundsState {
+  case unknown
   case detectedFaceTooSmall
   case detectedFaceTooLarge
   case detectedFaceOffCentre
-  case detectedFaceQualityTooLow
-  case detectedFaceNotFacingForward
-  case detectedFaceJustRight
+  case detectedFaceAppropriateSizeAndPosition
 }
 
 struct FaceGeometryModel {
@@ -71,45 +76,67 @@ struct FaceQualityModel {
 final class CameraViewModel: ObservableObject {
   // MARK: - Publishers
   @Published var debugModeEnabled: Bool
-  @Published var hasDetectedValidFace: Bool
-  @Published var faceGeometryState: FaceObservation<FaceGeometryModel> {
+
+  // MARK: - Publishers of derived state
+  @Published private(set) var hasDetectedValidFace: Bool
+  @Published private(set) var isAcceptableRoll: Bool {
     didSet {
-      faceDetectionState = calculateDetectedFaceValidity()
+      calculateDetectedFaceValidity()
+    }
+  }
+  @Published private(set) var isAcceptablePitch: Bool {
+    didSet {
+      calculateDetectedFaceValidity()
+    }
+  }
+  @Published private(set) var isAcceptableYaw: Bool {
+    didSet {
+      calculateDetectedFaceValidity()
+    }
+  }
+  @Published private(set) var isAcceptableBounds: FaceBoundsState {
+    didSet {
+      calculateDetectedFaceValidity()
+    }
+  }
+  @Published private(set) var isAcceptableQuality: Bool {
+    didSet {
+      calculateDetectedFaceValidity()
     }
   }
 
-  @Published var faceQualityState: FaceObservation<FaceQualityModel> {
+  // MARK: - Publishers of Vision data directly
+  @Published private(set) var faceDetectedState: FaceDetectedState
+  @Published private(set) var faceGeometryState: FaceObservation<FaceGeometryModel> {
     didSet {
-      faceDetectionState = calculateDetectedFaceValidity()
+      processUpdatedFaceGeometry()
     }
   }
-  @Published var faceDetectionState: FaceObservation<FaceDetectionState> {
+
+  @Published private(set) var faceQualityState: FaceObservation<FaceQualityModel> {
     didSet {
-      // Update `hasDetectedValidFace` shortcut value
-      switch faceDetectionState {
-      case .faceFound(let faceDetectionState):
-        switch faceDetectionState {
-        case .detectedFaceJustRight:
-          hasDetectedValidFace = true
-          return
-        default:
-          hasDetectedValidFace = false
-          return
-        }
-      default:
-        hasDetectedValidFace = false
-      }
+      processUpdatedFaceQuality()
     }
   }
 
   // MARK: - Private variables
   var faceLayoutGuideFrame = CGRect(x: 0, y: 0, width: 200, height: 300)
 
+  // MARK: - Vision framework state
+
+
   init() {
+    faceDetectedState = .noFaceDetected
+    isAcceptableRoll = false
+    isAcceptablePitch = false
+    isAcceptableYaw = false
+    isAcceptableBounds = .unknown
+    isAcceptableQuality = false
+
     hasDetectedValidFace = false
     faceGeometryState = .faceNotFound
     faceQualityState = .faceNotFound
-    faceDetectionState = .faceNotFound
+    // faceDetectionState = .faceNotFound
 
     #if DEBUG
       debugModeEnabled = true
@@ -149,20 +176,22 @@ final class CameraViewModel: ObservableObject {
 
   private func publishNoFaceObserved() {
     DispatchQueue.main.async { [self] in
+      faceDetectedState = .noFaceDetected
       faceGeometryState = .faceNotFound
       faceQualityState = .faceNotFound
-      faceDetectionState = .faceNotFound
     }
   }
 
   private func publishFaceObservation(_ faceGeometryModel: FaceGeometryModel) {
     DispatchQueue.main.async { [self] in
+      faceDetectedState = .faceDetected
       faceGeometryState = .faceFound(faceGeometryModel)
     }
   }
 
   private func publishFaceQualityObservation(_ faceQualityModel: FaceQualityModel) {
     DispatchQueue.main.async { [self] in
+      faceDetectedState = .faceDetected
       faceQualityState = .faceFound(faceQualityModel)
     }
   }
@@ -175,54 +204,91 @@ final class CameraViewModel: ObservableObject {
 // MARK: Private instance methods
 
 extension CameraViewModel {
-  func calculateDetectedFaceValidity() -> FaceObservation<FaceDetectionState> {
-    // First, check if the geometry is correct
+  func invalidateFaceGeometryState() {
+    isAcceptableRoll = false
+    isAcceptablePitch = false
+    isAcceptableYaw = false
+    isAcceptableBounds = .unknown
+  }
+
+  func processUpdatedFaceGeometry() {
     switch faceGeometryState {
     case .faceNotFound:
-      return .faceNotFound
+      invalidateFaceGeometryState()
     case .errored(let error):
-      return .errored(error)
+      print(error.localizedDescription)
+      invalidateFaceGeometryState()
     case .faceFound(let faceGeometryModel):
-      // First, check face is roughly the same size as the layout guide
       let boundingBox = faceGeometryModel.boundingBox
-      if boundingBox.width > 1.2 * faceLayoutGuideFrame.width {
-        return .faceFound(.detectedFaceTooLarge)
-      } else if boundingBox.width * 1.2 < faceLayoutGuideFrame.width {
-        return .faceFound(.detectedFaceTooSmall)
-      }
+      let roll = faceGeometryModel.roll.doubleValue
+      let pitch = faceGeometryModel.pitch.doubleValue
+      let yaw = faceGeometryModel.yaw.doubleValue
 
+      updateAcceptableBounds(using: boundingBox)
+      updateAcceptableRollPitchYaw(using: roll, pitch: pitch, yaw: yaw)
+    }
+  }
+
+  func updateAcceptableBounds(using boundingBox: CGRect) {
+    // First, check face is roughly the same size as the layout guide
+    if boundingBox.width > 1.2 * faceLayoutGuideFrame.width {
+      isAcceptableBounds = .detectedFaceTooLarge
+    } else if boundingBox.width * 1.2 < faceLayoutGuideFrame.width {
+      isAcceptableBounds = .detectedFaceTooSmall
+    } else {
       // Next, check face is roughly centered in the frame
       if abs(boundingBox.midX - faceLayoutGuideFrame.midX) > 50 {
-        return .faceFound(.detectedFaceOffCentre)
+        isAcceptableBounds = .detectedFaceOffCentre
       } else if abs(boundingBox.midY - faceLayoutGuideFrame.midY) > 50 {
-        return .faceFound(.detectedFaceOffCentre)
-      }
-
-      if faceGeometryModel.roll.doubleValue < 1.2 || faceGeometryModel.roll.doubleValue > 1.6 {
-        return .faceFound(.detectedFaceNotFacingForward)
-      }
-
-      if abs(CGFloat(faceGeometryModel.pitch.doubleValue)) > 0.1 {
-        return .faceFound(.detectedFaceNotFacingForward)
-      }
-
-      if abs(CGFloat(faceGeometryModel.yaw.doubleValue)) > 0.1 {
-        return .faceFound(.detectedFaceNotFacingForward)
+        isAcceptableBounds = .detectedFaceOffCentre
+      } else {
+        isAcceptableBounds = .detectedFaceAppropriateSizeAndPosition
       }
     }
+  }
 
-    // Next, check quality
+  func updateAcceptableRollPitchYaw(using roll: Double, pitch: Double, yaw: Double) {
+    if roll > 1.2 || roll < 1.6 {
+      isAcceptableRoll = true
+    } else {
+      isAcceptableRoll = false
+    }
+
+    if abs(CGFloat(pitch)) < 0.1 {
+      isAcceptablePitch = true
+    } else {
+      isAcceptablePitch = false
+    }
+
+    if abs(CGFloat(yaw)) < 0.1 {
+      isAcceptableYaw = true
+    } else {
+      isAcceptableYaw = false
+    }
+  }
+
+  func processUpdatedFaceQuality() {
     switch faceQualityState {
     case .faceNotFound:
-      return .faceNotFound
+      isAcceptableQuality = false
     case .errored(let error):
-      return .errored(error)
+      print(error.localizedDescription)
+      isAcceptableQuality = false
     case .faceFound(let faceQualityModel):
       if faceQualityModel.quality < 0.2 {
-        return .faceFound(.detectedFaceQualityTooLow)
+        isAcceptableQuality = false
       }
 
-      return .faceFound(.detectedFaceJustRight)
+      isAcceptableQuality = true
     }
+  }
+
+  func calculateDetectedFaceValidity() {
+    hasDetectedValidFace =
+    isAcceptableBounds == .detectedFaceAppropriateSizeAndPosition &&
+    isAcceptableRoll &&
+    isAcceptablePitch &&
+    isAcceptableYaw &&
+    isAcceptableQuality
   }
 }

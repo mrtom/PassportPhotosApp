@@ -33,7 +33,7 @@
 import SwiftUI
 
 struct UserInstructionsView: View {
-  let faceDetectionState: FaceObservation<FaceDetectionState>
+  let model: CameraViewModel
 
   var body: some View {
     Text(faceDetectionStateLabel())
@@ -45,26 +45,27 @@ struct UserInstructionsView: View {
 
 extension UserInstructionsView {
   func faceDetectionStateLabel() -> String {
-    switch faceDetectionState {
-    case .faceNotFound:
-      return "Please look at the camera"
-    case .faceFound(let faceDetectionState):
-      switch faceDetectionState {
-      case .detectedFaceJustRight:
-        return "Please take your photo :]"
-      case .detectedFaceTooSmall:
-        return "Please bring your face closer to the camera"
-      case .detectedFaceTooLarge:
-        return "Please hold the camera further from your face"
-      case .detectedFaceOffCentre:
-        return "Please move your face to the centre of the frame"
-      case .detectedFaceNotFacingForward:
-        return "Please look straight at the camera"
-      case .detectedFaceQualityTooLow:
-        return "Image quality too low"
-      }
-    case .errored(_):
+    switch model.faceDetectedState {
+    case .faceDetectionErrored:
       return "An unexpected error occurred"
+    case .noFaceDetected:
+      return "Please look at the camera"
+    case .faceDetected:
+      if model.hasDetectedValidFace {
+        return "Please take your photo :]"
+      } else if model.isAcceptableBounds == .detectedFaceTooSmall {
+        return "Please bring your face closer to the camera"
+      } else if model.isAcceptableBounds == .detectedFaceTooLarge {
+        return "Please hold the camera further from your face"
+      } else if model.isAcceptableBounds == .detectedFaceOffCentre {
+        return "Please move your face to the centre of the frame"
+      } else if !model.isAcceptableRoll || !model.isAcceptablePitch || !model.isAcceptableYaw {
+        return "Please look straight at the camera"
+      } else if !model.isAcceptableQuality {
+        return "Image quality too low"
+      } else {
+        return "We cannot take your photo right now"
+      }
     }
   }
 }
@@ -72,7 +73,7 @@ extension UserInstructionsView {
 struct UserInstructionsView_Previews: PreviewProvider {
   static var previews: some View {
     UserInstructionsView(
-      faceDetectionState: .faceFound(.detectedFaceJustRight)
+      model: CameraViewModel()
     )
   }
 }

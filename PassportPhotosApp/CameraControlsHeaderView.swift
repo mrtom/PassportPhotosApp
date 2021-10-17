@@ -39,7 +39,7 @@ struct CameraControlsHeaderView: View {
     ZStack {
       Rectangle()
         .fill(Color.black.opacity(0.8))
-      UserInstructionsView(faceDetectionState: model.faceDetectionState)
+      UserInstructionsView(model: model)
     }
   }
 }
