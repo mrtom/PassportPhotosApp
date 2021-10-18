@@ -140,7 +140,6 @@ final class CameraViewModel: ObservableObject {
     hasDetectedValidFace = false
     faceGeometryState = .faceNotFound
     faceQualityState = .faceNotFound
-    // faceDetectionState = .faceNotFound
 
     #if DEBUG
       debugModeEnabled = true

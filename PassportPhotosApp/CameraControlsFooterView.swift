@@ -35,49 +35,89 @@ import SwiftUI
 struct CameraControlsFooterView: View {
   @ObservedObject var model: CameraViewModel
 
-  @State private var isShowingPassportPhoto = false
-
   var body: some View {
     ZStack {
       Rectangle()
-        .fill(Color.black.opacity(0.8))
+        .fill(Color.black)
+      CameraControlsView(model: model)
+    }
+  }
+
+  struct CameraControlsView: View {
+    @ObservedObject var model: CameraViewModel
+
+    var body: some View {
       HStack(spacing: 20) {
         Spacer()
-        Button(action: {
+        DebugButton(isDebugEnabled: model.debugModeEnabled) {
           model.perform(action: .toggleDebugMode)
-        }, label: {
-          FooterIconView(imageName: "ladybug.fill")
-        })
-        .tint(model.debugModeEnabled ? .green : .gray)
-        Spacer()
-        Button(action: {
-          model.perform(action: .takePhoto)
-        }, label: {
-          FooterIconView(imageName: "camera.aperture")
-        })
-          .disabled(model.hasDetectedValidFace ? false : true)
-          .tint(.white)
-        Spacer()
-        if let photo = model.passportPhoto {
-          VStack {
-            NavigationLink(
-              destination: PassportPhotoView(passportPhoto: photo),
-              isActive: $isShowingPassportPhoto
-            ) {
-              EmptyView()
-            }
-            Button(action: {
-              isShowingPassportPhoto = true
-            }, label: {
-              Image(uiImage: photo)
-                .resizable()
-                .frame(width: 45.0, height: 60.0)
-          })
-          }
-        } else {
-          FooterIconView(imageName: "photo.fill.on.rectangle.fill")
         }
         Spacer()
+        ShutterButton(isDisabled: !model.hasDetectedValidFace) {
+          model.perform(action: .takePhoto)
+        }
+        Spacer()
+        ThumbnailView(passportPhoto: model.passportPhoto)
+        Spacer()
+      }
+    }
+  }
+
+  struct DebugButton: View {
+    let isDebugEnabled: Bool
+    let action: (() -> Void)
+
+    var body: some View {
+      Button(action: {
+        action()
+      }, label: {
+        FooterIconView(imageName: "ladybug.fill")
+      })
+        .tint(isDebugEnabled ? .green : .gray)
+    }
+  }
+
+  struct ShutterButton: View {
+    let isDisabled: Bool
+    let action: (() -> Void)
+
+    var body: some View {
+      Button(action: {
+        action()
+      }, label: {
+        Image(systemName: "camera.aperture")
+          .font(.system(size: 72))
+      })
+        .disabled(isDisabled)
+        .tint(.white)
+    }
+  }
+
+  struct ThumbnailView: View {
+    let passportPhoto: UIImage?
+
+    @State private var isShowingPassportPhoto = false
+
+    var body: some View {
+      if let photo = passportPhoto {
+        VStack {
+          NavigationLink(
+            destination: PassportPhotoView(passportPhoto: photo),
+            isActive: $isShowingPassportPhoto
+          ) {
+            EmptyView()
+          }
+          Button(action: {
+            isShowingPassportPhoto = true
+          }, label: {
+            Image(uiImage: photo)
+              .resizable()
+              .frame(width: 45.0, height: 60.0)
+          })
+        }
+      } else {
+        FooterIconView(imageName: "photo.fill.on.rectangle.fill")
+          .foregroundColor(.gray)
       }
     }
   }

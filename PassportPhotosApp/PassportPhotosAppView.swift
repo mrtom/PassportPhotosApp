@@ -56,7 +56,7 @@ struct PassportPhotosAppView: View {
         .ignoresSafeArea()
         .onAppear {
           model.perform(action: .windowSizeDetected(geo.frame(in: .global)))
-      }
+        }
       }
     }
   }

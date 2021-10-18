@@ -38,7 +38,7 @@ struct CameraControlsHeaderView: View {
   var body: some View {
     ZStack {
       Rectangle()
-        .fill(Color.black.opacity(0.8))
+        .fill(Color.black)
       UserInstructionsView(model: model)
     }
   }
