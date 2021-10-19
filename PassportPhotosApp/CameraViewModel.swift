@@ -123,8 +123,8 @@ final class CameraViewModel: ObservableObject {
     }
   }
 
-  // MARK: - UIKit Actions
-  var onShutterClick: (() -> Void)?
+  // MARK: Public properties
+  let faceDetector = FaceDetector()
 
   // MARK: - Private variables
   var faceLayoutGuideFrame = CGRect(x: 0, y: 0, width: 200, height: 300)
@@ -146,6 +146,8 @@ final class CameraViewModel: ObservableObject {
     #else
       debugModeEnabled = false
     #endif
+
+    faceDetector.model = self
   }
 
   // MARK: Actions
@@ -207,9 +209,7 @@ final class CameraViewModel: ObservableObject {
   }
 
   private func takePhoto() {
-    if let onShutterClick = onShutterClick {
-      onShutterClick()
-    }
+    faceDetector.capturePhoto()
   }
 
   private func savePhoto(_ photo: UIImage) {
