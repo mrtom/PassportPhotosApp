@@ -31,14 +31,26 @@
 /// THE SOFTWARE.
 
 import AVFoundation
+import CoreImage
+import MetalKit
 import UIKit
 
-final class CameraViewController: UIViewController {
+class CameraViewController: UIViewController {
   weak var delegate: FaceDetector?
 
   var previewLayer: AVCaptureVideoPreviewLayer?
-
   let session = AVCaptureSession()
+
+  var metalDevice: MTLDevice?
+  var metalCommandQueue: MTLCommandQueue?
+  var metalView: MTKView?
+  var ciContext: CIContext?
+
+  var currentCIImage: CIImage? {
+    didSet {
+      metalView?.draw()
+    }
+  }
 
   let dataOutputQueue = DispatchQueue(
     label: "video data queue",
@@ -49,6 +61,8 @@ final class CameraViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    delegate?.viewDelegate = self
+    configureMetal()
     configureCaptureSession()
 
     session.startRunning()
@@ -92,11 +106,9 @@ extension CameraViewController {
     previewLayer = AVCaptureVideoPreviewLayer(session: session)
     previewLayer?.videoGravity = .resizeAspect
     previewLayer?.frame = view.bounds
-    if let previewLayer = previewLayer {
-      view.layer.insertSublayer(previewLayer, at: 0)
-    }
-
-    delegate?.viewDelegate = self
+//    if let previewLayer = previewLayer {
+//      view.layer.insertSublayer(previewLayer, at: 0)
+//    }
   }
 }
 
@@ -109,5 +121,85 @@ extension CameraViewController: FaceDetectorDelegate {
     }
 
     return previewLayer.layerRectConverted(fromMetadataOutputRect: rect)
+  }
+
+  func draw(image: CIImage) {
+    currentCIImage = image
+  }
+}
+
+// MARK: Metal
+
+extension CameraViewController {
+  func configureMetal() {
+    guard let metalDevice = MTLCreateSystemDefaultDevice() else {
+      fatalError("Could not instantiate required metal properties")
+    }
+
+    metalCommandQueue = metalDevice.makeCommandQueue()
+
+    metalView = MTKView()
+    if let metalView = metalView {
+      metalView.device = metalDevice
+      metalView.isPaused = true
+      metalView.enableSetNeedsDisplay = false
+      metalView.delegate = self
+      metalView.framebufferOnly = false
+      metalView.frame = view.bounds
+      metalView.layer.contentsGravity = .resizeAspect
+      view.layer.insertSublayer(metalView.layer, at: 0)
+    }
+
+    ciContext = CIContext(mtlDevice: metalDevice)
+  }
+}
+
+extension CameraViewController: MTKViewDelegate {
+  func draw(in view: MTKView) {
+    guard
+      let metalView = metalView,
+      let metalCommandQueue = metalCommandQueue
+    else {
+      return
+    }
+
+    // Grab command buffer so we can encode instructions to GPU
+    guard let commandBuffer = metalCommandQueue.makeCommandBuffer() else {
+      return
+    }
+
+    guard let ciImage = currentCIImage else {
+      return
+    }
+
+    // Ensure drawable is free and not tied in the preivous drawing cycle
+    guard let currentDrawable = view.currentDrawable else {
+      return
+    }
+
+    // Make sure the image is full width, and scaled in height appropriately
+    let drawSize = metalView.drawableSize
+    let scaleX = drawSize.width / ciImage.extent.width
+
+    let newImage = ciImage.transformed(by: .init(scaleX: scaleX, y: scaleX))
+
+    let originY = (newImage.extent.height - drawSize.height) / 2
+
+    // Render into the metal texture
+    ciContext?.render(
+      newImage,
+      to: currentDrawable.texture,
+      commandBuffer: commandBuffer,
+      bounds: CGRect(x: 0, y: originY, width: newImage.extent.width, height: newImage.extent.height),
+      colorSpace: CGColorSpaceCreateDeviceRGB()
+    )
+
+    // Register drawwable to command buffer
+    commandBuffer.present(currentDrawable)
+    commandBuffer.commit()
+  }
+
+  func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+    // Delegate method not implemented.
   }
 }

@@ -31,11 +31,13 @@
 /// THE SOFTWARE.
 
 import AVFoundation
+import CoreImage
 import UIKit
 import Vision
 
 protocol FaceDetectorDelegate: NSObjectProtocol {
   func convertFromMetadataToPreviewRect(rect: CGRect) -> CGRect
+  func draw(image: CIImage)
 }
 
 class FaceDetector: NSObject {
@@ -78,6 +80,9 @@ extension FaceDetector: AVCaptureVideoDataOutputSampleBufferDelegate {
     } catch {
       print(error.localizedDescription)
     }
+
+    let originalImage = CIImage(cvPixelBuffer: imageBuffer).oriented(.upMirrored)
+    viewDelegate?.draw(image: originalImage)
   }
 }
 
