@@ -47,21 +47,21 @@ class FaceDetector: NSObject {
     didSet {
       model?.$hideBackgroundModeEnabled
         .dropFirst()
-        .sink(receiveValue: { hideBackgroundMode in
+        .sink { hideBackgroundMode in
           self.isReplacingBackground = hideBackgroundMode
-        })
+        }
         .store(in: &subscriptions)
 
       model?.$shutterReleased
         .dropFirst()
-        .sink(receiveValue: { shutterReleased in
+        .sink { shutterReleased in
           switch shutterReleased.value {
           case .firing(let isCapturingPhoto):
             self.isCapturingPhoto = isCapturingPhoto
           case .off:
             return
           }
-        })
+        }
         .store(in: &subscriptions)
     }
   }
