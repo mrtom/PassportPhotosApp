@@ -36,7 +36,7 @@ import MetalKit
 import UIKit
 
 class CameraViewController: UIViewController {
-  weak var avCaptureDelegate: FaceDetector?
+  var faceDetector: FaceDetector?
 
   var previewLayer: AVCaptureVideoPreviewLayer?
   let session = AVCaptureSession()
@@ -62,7 +62,7 @@ class CameraViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    avCaptureDelegate?.viewDelegate = self
+    faceDetector?.viewDelegate = self
     configureMetal()
     configureCaptureSession()
 
@@ -94,7 +94,7 @@ extension CameraViewController {
     // Create the video data output
     let videoOutput = AVCaptureVideoDataOutput()
     videoOutput.alwaysDiscardsLateVideoFrames = true
-    videoOutput.setSampleBufferDelegate(avCaptureDelegate, queue: videoOutputQueue)
+    videoOutput.setSampleBufferDelegate(faceDetector, queue: videoOutputQueue)
     videoOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
 
     // Add the video output to the capture session

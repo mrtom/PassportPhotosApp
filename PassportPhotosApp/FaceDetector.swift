@@ -46,7 +46,22 @@ class FaceDetector: NSObject {
   weak var model: CameraViewModel? {
     didSet {
       model?.$hideBackgroundModeEnabled
-        .sink(receiveValue: { hideBackgroundMode in self.isReplacingBackground = hideBackgroundMode })
+        .dropFirst()
+        .sink(receiveValue: { hideBackgroundMode in
+          self.isReplacingBackground = hideBackgroundMode
+        })
+        .store(in: &subscriptions)
+
+      model?.$shutterReleased
+        .dropFirst()
+        .sink(receiveValue: { shutterReleased in
+          switch shutterReleased.value {
+          case .firing(let isCapturingPhoto):
+            self.isCapturingPhoto = isCapturingPhoto
+          case .off:
+            return
+          }
+        })
         .store(in: &subscriptions)
     }
   }

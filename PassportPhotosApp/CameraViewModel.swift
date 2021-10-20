@@ -81,6 +81,7 @@ final class CameraViewModel: ObservableObject {
   // MARK: - Publishers
   @Published var debugModeEnabled: Bool
   @Published var hideBackgroundModeEnabled: Bool
+  @Published var shutterReleased = Impulse<Bool>()
 
   // MARK: - Publishers of derived state
   @Published private(set) var hasDetectedValidFace: Bool
@@ -125,9 +126,6 @@ final class CameraViewModel: ObservableObject {
     }
   }
 
-  // MARK: Public properties
-  let faceDetector = FaceDetector()
-
   // MARK: - Private variables
   var faceLayoutGuideFrame = CGRect(x: 0, y: 0, width: 200, height: 300)
 
@@ -149,8 +147,6 @@ final class CameraViewModel: ObservableObject {
       debugModeEnabled = false
     #endif
     hideBackgroundModeEnabled = false
-
-    faceDetector.model = self
   }
 
   // MARK: Actions
@@ -218,7 +214,7 @@ final class CameraViewModel: ObservableObject {
   }
 
   private func takePhoto() {
-    faceDetector.capturePhoto()
+    shutterReleased = Impulse(value: true)
   }
 
   private func savePhoto(_ photo: UIImage) {

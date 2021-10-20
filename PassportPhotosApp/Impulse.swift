@@ -30,22 +30,21 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 /// THE SOFTWARE.
 
-import SwiftUI
+import Foundation
 
-struct CameraView: UIViewControllerRepresentable {
-  typealias UIViewControllerType = CameraViewController
-
-  private(set) var model: CameraViewModel
-
-  func makeUIViewController(context: Context) -> CameraViewController {
-    let faceDetector = FaceDetector()
-    faceDetector.model = model
-
-    let viewController = CameraViewController()
-    viewController.faceDetector = faceDetector
-
-    return viewController
+class Impulse<T> {
+  enum ImpulseInstant<T> {
+    case off
+    case firing(T)
   }
 
-  func updateUIViewController(_ uiViewController: CameraViewController, context: Context) { }
+  let value: ImpulseInstant<T>
+
+  init() {
+    value = .off
+  }
+
+  init(value: T) {
+    self.value = .firing(value)
+  }
 }
