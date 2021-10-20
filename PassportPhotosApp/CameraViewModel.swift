@@ -47,6 +47,7 @@ enum CameraViewModelAction {
 
   // Other
   case toggleDebugMode
+  case toggleHideBackgroundMode
   case takePhoto
   case savePhoto(UIImage)
 }
@@ -79,6 +80,7 @@ struct FaceQualityModel {
 final class CameraViewModel: ObservableObject {
   // MARK: - Publishers
   @Published var debugModeEnabled: Bool
+  @Published var hideBackgroundModeEnabled: Bool
 
   // MARK: - Publishers of derived state
   @Published private(set) var hasDetectedValidFace: Bool
@@ -146,6 +148,7 @@ final class CameraViewModel: ObservableObject {
     #else
       debugModeEnabled = false
     #endif
+    hideBackgroundModeEnabled = false
 
     faceDetector.model = self
   }
@@ -164,6 +167,8 @@ final class CameraViewModel: ObservableObject {
       publishFaceQualityObservation(faceQualityObservation)
     case .toggleDebugMode:
       toggleDebugMode()
+    case .toggleHideBackgroundMode:
+      toggleHideBackgroundMode()
     case .takePhoto:
       takePhoto()
     case .savePhoto(let image):
@@ -206,6 +211,10 @@ final class CameraViewModel: ObservableObject {
 
   private func toggleDebugMode() {
     debugModeEnabled.toggle()
+  }
+
+  private func toggleHideBackgroundMode() {
+    hideBackgroundModeEnabled.toggle()
   }
 
   private func takePhoto() {

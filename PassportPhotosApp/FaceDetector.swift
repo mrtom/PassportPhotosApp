@@ -31,7 +31,8 @@
 /// THE SOFTWARE.
 
 import AVFoundation
-import CoreImage
+import Combine
+import CoreImage.CIFilterBuiltins
 import UIKit
 import Vision
 
@@ -42,10 +43,21 @@ protocol FaceDetectorDelegate: NSObjectProtocol {
 
 class FaceDetector: NSObject {
   weak var viewDelegate: FaceDetectorDelegate?
-  weak var model: CameraViewModel?
+  weak var model: CameraViewModel? {
+    didSet {
+      model?.$hideBackgroundModeEnabled
+        .dropFirst()
+        .sink(receiveValue: { hideBackgroundMode in self.isMaskingBackground = hideBackgroundMode })
+        .store(in: &subscriptions)
+    }
+  }
 
   var sequenceHandler = VNSequenceRequestHandler()
   var isCapturingPhoto = false
+  var isMaskingBackground = false
+  var currentFrameBuffer: CVImageBuffer?
+
+  var subscriptions = Set<AnyCancellable>()
 
   func capturePhoto() {
     isCapturingPhoto = true
@@ -72,17 +84,19 @@ extension FaceDetector: AVCaptureVideoDataOutputSampleBufferDelegate {
     let detectCaptureQualityRequest = VNDetectFaceCaptureQualityRequest(completionHandler: detectedFaceQualityRequest)
     detectCaptureQualityRequest.revision = VNDetectFaceCaptureQualityRequestRevision2
 
+    let detectSegmentationRequest = VNGeneratePersonSegmentationRequest(completionHandler: detectedSegmentationRequest)
+    detectSegmentationRequest.qualityLevel = .balanced
+    detectSegmentationRequest.outputPixelFormat = kCVPixelFormatType_OneComponent8
+
+    currentFrameBuffer = imageBuffer
     do {
       try sequenceHandler.perform(
-        [detectFaceRectanglesRequest, detectCaptureQualityRequest],
+        [detectFaceRectanglesRequest, detectCaptureQualityRequest, detectSegmentationRequest],
         on: imageBuffer,
         orientation: .leftMirrored)
     } catch {
       print(error.localizedDescription)
     }
-
-    let originalImage = CIImage(cvPixelBuffer: imageBuffer).oriented(.upMirrored)
-    viewDelegate?.draw(image: originalImage)
   }
 }
 
@@ -133,6 +147,43 @@ extension FaceDetector {
     )
 
     model.perform(action: .faceQualityObservationDetected(faceQualityModel))
+  }
+
+  func detectedSegmentationRequest(request: VNRequest, error: Error?) {
+    guard
+      let results = request.results as? [VNPixelBufferObservation],
+      let result = results.first,
+      let currentFrameBuffer = currentFrameBuffer
+    else {
+      return
+    }
+
+    if isMaskingBackground {
+      let maskPixelBuffer = result.pixelBuffer
+      var maskImage = CIImage(cvPixelBuffer: maskPixelBuffer)
+
+      let originalImage = CIImage(cvImageBuffer: currentFrameBuffer).oriented(.right)
+
+      // Scale the mask image to fit the bounds of the video frame.
+      let scaleX = originalImage.extent.width / maskImage.extent.width
+      let scaleY = originalImage.extent.height / maskImage.extent.height
+      maskImage = maskImage.transformed(by: .init(scaleX: scaleX, y: scaleY)).oriented(.upMirrored)
+
+      let backgroundImage = CIImage(color: .white).clampedToExtent().cropped(to: originalImage.extent)
+
+      let blendFilter = CIFilter.blendWithRedMask()
+      blendFilter.inputImage = originalImage
+      blendFilter.backgroundImage = backgroundImage
+      blendFilter.maskImage = maskImage
+
+      if let outputImage = blendFilter.outputImage?.oriented(.left) {
+        // Set the new, blended image as current.
+        viewDelegate?.draw(image: outputImage.oriented(.upMirrored))
+      }
+    } else {
+      let originalImage = CIImage(cvImageBuffer: currentFrameBuffer).oriented(.upMirrored)
+      viewDelegate?.draw(image: originalImage)
+    }
   }
 
   func savePassportPhoto(from pixelBuffer: CVPixelBuffer) {

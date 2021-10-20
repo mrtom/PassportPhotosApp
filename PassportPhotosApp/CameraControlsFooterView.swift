@@ -49,8 +49,13 @@ struct CameraControlsFooterView: View {
     var body: some View {
       HStack(spacing: 20) {
         Spacer()
-        DebugButton(isDebugEnabled: model.debugModeEnabled) {
-          model.perform(action: .toggleDebugMode)
+        VStack(spacing: 20) {
+          HideBackgroundButton(isHideBackgroundEnabled: model.hideBackgroundModeEnabled) {
+            model.perform(action: .toggleHideBackgroundMode)
+          }
+          DebugButton(isDebugEnabled: model.debugModeEnabled) {
+            model.perform(action: .toggleDebugMode)
+          }
         }
         Spacer()
         ShutterButton(isDisabled: !model.hasDetectedValidFace) {
@@ -60,6 +65,20 @@ struct CameraControlsFooterView: View {
         ThumbnailView(passportPhoto: model.passportPhoto)
         Spacer()
       }
+    }
+  }
+
+  struct HideBackgroundButton: View {
+    let isHideBackgroundEnabled: Bool
+    let action: (() -> Void)
+
+    var body: some View {
+      Button(action: {
+        action()
+      }, label: {
+        FooterIconView(imageName: "photo.fill")
+      })
+        .tint(isHideBackgroundEnabled ? .green : .gray)
     }
   }
 
