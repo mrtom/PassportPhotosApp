@@ -36,11 +36,12 @@ import MetalKit
 import UIKit
 
 class CameraViewController: UIViewController {
-  weak var delegate: FaceDetector?
+  weak var avCaptureDelegate: FaceDetector?
 
   var previewLayer: AVCaptureVideoPreviewLayer?
   let session = AVCaptureSession()
 
+  var isUsingMetal = false
   var metalDevice: MTLDevice?
   var metalCommandQueue: MTLCommandQueue?
   var metalView: MTKView?
@@ -61,7 +62,7 @@ class CameraViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    delegate?.viewDelegate = self
+    avCaptureDelegate?.viewDelegate = self
     configureMetal()
     configureCaptureSession()
 
@@ -69,7 +70,7 @@ class CameraViewController: UIViewController {
   }
 }
 
-// MARK: - Video Processing methods
+// MARK: - Setup video capture
 
 extension CameraViewController {
   func configureCaptureSession() {
@@ -93,7 +94,7 @@ extension CameraViewController {
     // Create the video data output
     let videoOutput = AVCaptureVideoDataOutput()
     videoOutput.alwaysDiscardsLateVideoFrames = true
-    videoOutput.setSampleBufferDelegate(delegate, queue: videoOutputQueue)
+    videoOutput.setSampleBufferDelegate(avCaptureDelegate, queue: videoOutputQueue)
     videoOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
 
     // Add the video output to the capture session
@@ -106,29 +107,14 @@ extension CameraViewController {
     previewLayer = AVCaptureVideoPreviewLayer(session: session)
     previewLayer?.videoGravity = .resizeAspect
     previewLayer?.frame = view.bounds
-//    if let previewLayer = previewLayer {
-//      view.layer.insertSublayer(previewLayer, at: 0)
-//    }
-  }
-}
 
-// MARK: FaceDetectorDelegate methods
-
-extension CameraViewController: FaceDetectorDelegate {
-  func convertFromMetadataToPreviewRect(rect: CGRect) -> CGRect {
-    guard let previewLayer = previewLayer else {
-      return CGRect.zero
+    if !isUsingMetal, let previewLayer = previewLayer {
+      view.layer.insertSublayer(previewLayer, at: 0)
     }
-
-    return previewLayer.layerRectConverted(fromMetadataOutputRect: rect)
-  }
-
-  func draw(image: CIImage) {
-    currentCIImage = image
   }
 }
 
-// MARK: Metal
+// MARK: Setup Metal
 
 extension CameraViewController {
   func configureMetal() {
@@ -136,6 +122,7 @@ extension CameraViewController {
       fatalError("Could not instantiate required metal properties")
     }
 
+    isUsingMetal = true
     metalCommandQueue = metalDevice.makeCommandQueue()
 
     metalView = MTKView()
@@ -153,6 +140,8 @@ extension CameraViewController {
     ciContext = CIContext(mtlDevice: metalDevice)
   }
 }
+
+// MARK: - Metal view delegate methods
 
 extension CameraViewController: MTKViewDelegate {
   func draw(in view: MTKView) {
@@ -199,7 +188,21 @@ extension CameraViewController: MTKViewDelegate {
     commandBuffer.commit()
   }
 
-  func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-    // Delegate method not implemented.
+  func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) { }
+}
+
+// MARK: FaceDetectorDelegate methods
+
+extension CameraViewController: FaceDetectorDelegate {
+  func convertFromMetadataToPreviewRect(rect: CGRect) -> CGRect {
+    guard let previewLayer = previewLayer else {
+      return CGRect.zero
+    }
+
+    return previewLayer.layerRectConverted(fromMetadataOutputRect: rect)
+  }
+
+  func draw(image: CIImage) {
+    currentCIImage = image
   }
 }

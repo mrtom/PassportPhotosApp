@@ -39,7 +39,7 @@ struct CameraView: UIViewControllerRepresentable {
 
   func makeUIViewController(context: Context) -> CameraViewController {
     let viewController = CameraViewController()
-    viewController.delegate = model.faceDetector
+    viewController.avCaptureDelegate = model.faceDetector
 
     return viewController
   }

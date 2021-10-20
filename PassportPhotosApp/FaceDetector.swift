@@ -46,7 +46,6 @@ class FaceDetector: NSObject {
   weak var model: CameraViewModel? {
     didSet {
       model?.$hideBackgroundModeEnabled
-        .dropFirst()
         .sink(receiveValue: { hideBackgroundMode in self.isReplacingBackground = hideBackgroundMode })
         .store(in: &subscriptions)
     }
@@ -111,7 +110,7 @@ extension FaceDetector: AVCaptureVideoDataOutputSampleBufferDelegate {
 
 extension FaceDetector {
   func detectedFaceRectangles(request: VNRequest, error: Error?) {
-    guard let model = model, let delegate = viewDelegate else {
+    guard let model = model, let viewDelegate = viewDelegate else {
       return
     }
 
@@ -124,7 +123,7 @@ extension FaceDetector {
     }
 
     let convertedBoundingBox =
-      delegate.convertFromMetadataToPreviewRect(rect: result.boundingBox)
+      viewDelegate.convertFromMetadataToPreviewRect(rect: result.boundingBox)
 
     let faceObservationModel = FaceGeometryModel(
       boundingBox: convertedBoundingBox,
