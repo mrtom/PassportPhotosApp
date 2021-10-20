@@ -59,6 +59,13 @@ class FaceDetector: NSObject {
 
   var subscriptions = Set<AnyCancellable>()
 
+  let imageProcessingQueue = DispatchQueue(
+    label: "Image Processing Queue",
+    qos: .userInitiated,
+    attributes: [],
+    autoreleaseFrequency: .workItem
+  )
+
   func capturePhoto() {
     isCapturingPhoto = true
   }
@@ -174,39 +181,44 @@ extension FaceDetector {
       return
     }
 
-    let originalImage = CIImage(cvPixelBuffer: pixelBuffer)
-    var outputImage = originalImage
+    imageProcessingQueue.async { [self] in
+      let originalImage = CIImage(cvPixelBuffer: pixelBuffer)
+      var outputImage = originalImage
 
-    if isReplacingBackground {
-      let detectSegmentationRequest = VNGeneratePersonSegmentationRequest()
-      detectSegmentationRequest.qualityLevel = .accurate
-      detectSegmentationRequest.outputPixelFormat = kCVPixelFormatType_OneComponent8
+      if isReplacingBackground {
+        let detectSegmentationRequest = VNGeneratePersonSegmentationRequest()
+        detectSegmentationRequest.qualityLevel = .accurate
+        detectSegmentationRequest.outputPixelFormat = kCVPixelFormatType_OneComponent8
 
-      try? sequenceHandler.perform(
-        [detectSegmentationRequest],
-        on: pixelBuffer,
-        orientation: .leftMirrored
-      )
+        try? sequenceHandler.perform(
+          [detectSegmentationRequest],
+          on: pixelBuffer,
+          orientation: .leftMirrored
+        )
 
-      if let maskPixelBuffer = detectSegmentationRequest.results?.first?.pixelBuffer {
-        outputImage = removeBackgroundFrom(image: originalImage, using: maskPixelBuffer)
+        if let maskPixelBuffer = detectSegmentationRequest.results?.first?.pixelBuffer {
+          outputImage = removeBackgroundFrom(image: originalImage, using: maskPixelBuffer)
+        }
       }
-    }
 
 
-    let coreImageWidth = outputImage.extent.width
-    let coreImageHeight = outputImage.extent.height
+      let coreImageWidth = outputImage.extent.width
+      let coreImageHeight = outputImage.extent.height
 
-    let desiredImageHeight = coreImageWidth * 4 / 3
+      let desiredImageHeight = coreImageWidth * 4 / 3
 
-    // Calculate frame of photo
-    let yOrigin = (coreImageHeight - desiredImageHeight) / 2
-    let photoRect = CGRect(x: 0, y: yOrigin, width: coreImageWidth, height: desiredImageHeight)
+      // Calculate frame of photo
+      let yOrigin = (coreImageHeight - desiredImageHeight) / 2
+      let photoRect = CGRect(x: 0, y: yOrigin, width: coreImageWidth, height: desiredImageHeight)
 
-    let context = CIContext()
-    if let cgImage = context.createCGImage(outputImage, from: photoRect) {
-      let passportPhoto = UIImage(cgImage: cgImage, scale: 1, orientation: .upMirrored)
-      model.perform(action: .savePhoto(passportPhoto))
+      let context = CIContext()
+      if let cgImage = context.createCGImage(outputImage, from: photoRect) {
+        let passportPhoto = UIImage(cgImage: cgImage, scale: 1, orientation: .upMirrored)
+
+        DispatchQueue.main.async {
+          model.perform(action: .savePhoto(passportPhoto))
+        }
+      }
     }
   }
 

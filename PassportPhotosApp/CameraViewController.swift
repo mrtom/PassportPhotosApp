@@ -52,8 +52,8 @@ class CameraViewController: UIViewController {
     }
   }
 
-  let dataOutputQueue = DispatchQueue(
-    label: "video data queue",
+  let videoOutputQueue = DispatchQueue(
+    label: "Video Output Queue",
     qos: .userInitiated,
     attributes: [],
     autoreleaseFrequency: .workItem
@@ -93,7 +93,7 @@ extension CameraViewController {
     // Create the video data output
     let videoOutput = AVCaptureVideoDataOutput()
     videoOutput.alwaysDiscardsLateVideoFrames = true
-    videoOutput.setSampleBufferDelegate(delegate, queue: dataOutputQueue)
+    videoOutput.setSampleBufferDelegate(delegate, queue: videoOutputQueue)
     videoOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
 
     // Add the video output to the capture session
