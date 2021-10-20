@@ -47,14 +47,14 @@ class FaceDetector: NSObject {
     didSet {
       model?.$hideBackgroundModeEnabled
         .dropFirst()
-        .sink(receiveValue: { hideBackgroundMode in self.isMaskingBackground = hideBackgroundMode })
+        .sink(receiveValue: { hideBackgroundMode in self.isReplacingBackground = hideBackgroundMode })
         .store(in: &subscriptions)
     }
   }
 
   var sequenceHandler = VNSequenceRequestHandler()
   var isCapturingPhoto = false
-  var isMaskingBackground = false
+  var isReplacingBackground = false
   var currentFrameBuffer: CVImageBuffer?
 
   var subscriptions = Set<AnyCancellable>()
@@ -158,28 +158,11 @@ extension FaceDetector {
       return
     }
 
-    if isMaskingBackground {
+    if isReplacingBackground {
+      let originalImage = CIImage(cvImageBuffer: currentFrameBuffer)
       let maskPixelBuffer = result.pixelBuffer
-      var maskImage = CIImage(cvPixelBuffer: maskPixelBuffer)
-
-      let originalImage = CIImage(cvImageBuffer: currentFrameBuffer).oriented(.right)
-
-      // Scale the mask image to fit the bounds of the video frame.
-      let scaleX = originalImage.extent.width / maskImage.extent.width
-      let scaleY = originalImage.extent.height / maskImage.extent.height
-      maskImage = maskImage.transformed(by: .init(scaleX: scaleX, y: scaleY)).oriented(.upMirrored)
-
-      let backgroundImage = CIImage(color: .white).clampedToExtent().cropped(to: originalImage.extent)
-
-      let blendFilter = CIFilter.blendWithRedMask()
-      blendFilter.inputImage = originalImage
-      blendFilter.backgroundImage = backgroundImage
-      blendFilter.maskImage = maskImage
-
-      if let outputImage = blendFilter.outputImage?.oriented(.left) {
-        // Set the new, blended image as current.
-        viewDelegate?.draw(image: outputImage.oriented(.upMirrored))
-      }
+      let outputImage = removeBackgroundFrom(image: originalImage, using: maskPixelBuffer)
+      viewDelegate?.draw(image: outputImage.oriented(.upMirrored))
     } else {
       let originalImage = CIImage(cvImageBuffer: currentFrameBuffer).oriented(.upMirrored)
       viewDelegate?.draw(image: originalImage)
@@ -191,9 +174,28 @@ extension FaceDetector {
       return
     }
 
-    let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-    let coreImageWidth = ciImage.extent.width
-    let coreImageHeight = ciImage.extent.height
+    let originalImage = CIImage(cvPixelBuffer: pixelBuffer)
+    var outputImage = originalImage
+
+    if isReplacingBackground {
+      let detectSegmentationRequest = VNGeneratePersonSegmentationRequest()
+      detectSegmentationRequest.qualityLevel = .accurate
+      detectSegmentationRequest.outputPixelFormat = kCVPixelFormatType_OneComponent8
+
+      try? sequenceHandler.perform(
+        [detectSegmentationRequest],
+        on: pixelBuffer,
+        orientation: .leftMirrored
+      )
+
+      if let maskPixelBuffer = detectSegmentationRequest.results?.first?.pixelBuffer {
+        outputImage = removeBackgroundFrom(image: originalImage, using: maskPixelBuffer)
+      }
+    }
+
+
+    let coreImageWidth = outputImage.extent.width
+    let coreImageHeight = outputImage.extent.height
 
     let desiredImageHeight = coreImageWidth * 4 / 3
 
@@ -202,9 +204,33 @@ extension FaceDetector {
     let photoRect = CGRect(x: 0, y: yOrigin, width: coreImageWidth, height: desiredImageHeight)
 
     let context = CIContext()
-    if let cgImage = context.createCGImage(ciImage, from: photoRect) {
+    if let cgImage = context.createCGImage(outputImage, from: photoRect) {
       let passportPhoto = UIImage(cgImage: cgImage, scale: 1, orientation: .upMirrored)
       model.perform(action: .savePhoto(passportPhoto))
     }
+  }
+
+  func removeBackgroundFrom(image: CIImage, using maskPixelBuffer: CVPixelBuffer) -> CIImage {
+    var maskImage = CIImage(cvPixelBuffer: maskPixelBuffer)
+
+    let originalImage = image.oriented(.right)
+
+    // Scale the mask image to fit the bounds of the video frame.
+    let scaleX = originalImage.extent.width / maskImage.extent.width
+    let scaleY = originalImage.extent.height / maskImage.extent.height
+    maskImage = maskImage.transformed(by: .init(scaleX: scaleX, y: scaleY)).oriented(.upMirrored)
+
+    let backgroundImage = CIImage(color: .white).clampedToExtent().cropped(to: originalImage.extent)
+
+    let blendFilter = CIFilter.blendWithRedMask()
+    blendFilter.inputImage = originalImage
+    blendFilter.backgroundImage = backgroundImage
+    blendFilter.maskImage = maskImage
+
+    if let outputImage = blendFilter.outputImage?.oriented(.left) {
+      return outputImage
+    }
+
+    return originalImage
   }
 }
