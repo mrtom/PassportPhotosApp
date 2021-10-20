@@ -51,7 +51,7 @@ struct PassportPhotosAppView: View {
           if model.debugModeEnabled {
             DebugView(model: model)
           }
-          CameraControlsView(model: model)
+          CameraOverlayView(model: model)
         }
         .ignoresSafeArea()
         .onAppear {

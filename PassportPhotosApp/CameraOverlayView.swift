@@ -32,7 +32,7 @@
 
 import SwiftUI
 
-struct CameraControlsView: View {
+struct CameraOverlayView: View {
   @ObservedObject private(set) var model: CameraViewModel
 
   var body: some View {
@@ -49,6 +49,6 @@ struct CameraControlsView: View {
 
 struct CameraControlsView_Previews: PreviewProvider {
   static var previews: some View {
-    CameraControlsView(model: CameraViewModel())
+    CameraOverlayView(model: CameraViewModel())
   }
 }

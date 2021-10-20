@@ -22,7 +22,7 @@
 		E2695384270F9225002BA294 /* FaceObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2695383270F9225002BA294 /* FaceObservation.swift */; };
 		E2695386270F9810002BA294 /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2695385270F9810002BA294 /* DebugView.swift */; };
 		E2695388270F9B63002BA294 /* FaceBoundingBoxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2695387270F9B63002BA294 /* FaceBoundingBoxView.swift */; };
-		E269538A271020B6002BA294 /* CameraControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2695389271020B6002BA294 /* CameraControlsView.swift */; };
+		E269538A271020B6002BA294 /* CameraOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2695389271020B6002BA294 /* CameraOverlayView.swift */; };
 		E269538C27102426002BA294 /* CameraControlsHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E269538B27102426002BA294 /* CameraControlsHeaderView.swift */; };
 		E269538E27102431002BA294 /* CameraControlsFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E269538D27102430002BA294 /* CameraControlsFooterView.swift */; };
 		E2695390271024AD002BA294 /* LayoutGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E269538F271024AD002BA294 /* LayoutGuideView.swift */; };
@@ -46,7 +46,7 @@
 		E2695383270F9225002BA294 /* FaceObservation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceObservation.swift; sourceTree = "<group>"; };
 		E2695385270F9810002BA294 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
 		E2695387270F9B63002BA294 /* FaceBoundingBoxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceBoundingBoxView.swift; sourceTree = "<group>"; };
-		E2695389271020B6002BA294 /* CameraControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraControlsView.swift; sourceTree = "<group>"; };
+		E2695389271020B6002BA294 /* CameraOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraOverlayView.swift; sourceTree = "<group>"; };
 		E269538B27102426002BA294 /* CameraControlsHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraControlsHeaderView.swift; sourceTree = "<group>"; };
 		E269538D27102430002BA294 /* CameraControlsFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraControlsFooterView.swift; sourceTree = "<group>"; };
 		E269538F271024AD002BA294 /* LayoutGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutGuideView.swift; sourceTree = "<group>"; };
@@ -85,9 +85,9 @@
 			isa = PBXGroup;
 			children = (
 				1839F4AF25190F2A00BB00F1 /* AppMain.swift */,
-				E2695389271020B6002BA294 /* CameraControlsView.swift */,
 				E269538D27102430002BA294 /* CameraControlsFooterView.swift */,
 				E269538B27102426002BA294 /* CameraControlsHeaderView.swift */,
+				E2695389271020B6002BA294 /* CameraOverlayView.swift */,
 				E269537E270F86B7002BA294 /* CameraView.swift */,
 				E226A16E271F0A5200ED4786 /* CameraViewController.swift */,
 				E2695381270F9061002BA294 /* CameraViewModel.swift */,
@@ -216,7 +216,7 @@
 				E2695390271024AD002BA294 /* LayoutGuideView.swift in Sources */,
 				18D775C522AD944300AE281E /* PassportPhotosAppView.swift in Sources */,
 				1839F4B025190F2A00BB00F1 /* AppMain.swift in Sources */,
-				E269538A271020B6002BA294 /* CameraControlsView.swift in Sources */,
+				E269538A271020B6002BA294 /* CameraOverlayView.swift in Sources */,
 				E2695386270F9810002BA294 /* DebugView.swift in Sources */,
 				E2695384270F9225002BA294 /* FaceObservation.swift in Sources */,
 				E226A16D271EED2E00ED4786 /* FaceDetector.swift in Sources */,
