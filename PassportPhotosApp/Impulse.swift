@@ -32,7 +32,7 @@
 
 import Foundation
 
-class Impulse<T> {
+struct Impulse<T> {
   enum ImpulseInstant<T> {
     case off
     case firing(T)
