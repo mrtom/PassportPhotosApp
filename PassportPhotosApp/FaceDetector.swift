@@ -52,17 +52,17 @@ class FaceDetector: NSObject {
         }
         .store(in: &subscriptions)
 
-      model?.$shutterReleased
-        .dropFirst()
-        .sink { shutterReleased in
-          switch shutterReleased.value {
-          case .firing(let isCapturingPhoto):
-            self.isCapturingPhoto = isCapturingPhoto
-          case .off:
-            return
-          }
+      model?.shutterReleased.sink { completion in
+        switch completion {
+        case .finished:
+          return
+        case .failure(let error):
+          print("Received error: \(error)")
         }
-        .store(in: &subscriptions)
+      } receiveValue: { _ in
+        self.isCapturingPhoto = true
+      }
+      .store(in: &subscriptions)
     }
   }
 

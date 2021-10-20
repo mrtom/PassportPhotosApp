@@ -81,7 +81,6 @@ final class CameraViewModel: ObservableObject {
   // MARK: - Publishers
   @Published var debugModeEnabled: Bool
   @Published var hideBackgroundModeEnabled: Bool
-  @Published var shutterReleased = Impulse<Bool>()
 
   // MARK: - Publishers of derived state
   @Published private(set) var hasDetectedValidFace: Bool
@@ -125,6 +124,9 @@ final class CameraViewModel: ObservableObject {
       processUpdatedFaceQuality()
     }
   }
+
+  // MARK: - Public properties
+  let shutterReleased = PassthroughSubject<Void, Never>()
 
   // MARK: - Private variables
   var faceLayoutGuideFrame = CGRect(x: 0, y: 0, width: 200, height: 300)
@@ -214,7 +216,7 @@ final class CameraViewModel: ObservableObject {
   }
 
   private func takePhoto() {
-    shutterReleased = Impulse(value: true)
+    shutterReleased.send()
   }
 
   private func savePhoto(_ photo: UIImage) {
