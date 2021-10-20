@@ -40,17 +40,8 @@ struct DebugView: View {
       FaceBoundingBoxView(model: model)
       FaceLayoutGuideView(model: model)
       VStack(alignment: .leading, spacing: 5) {
-        DebugSection(observation: model.faceGeometryState) { geometryModel in
-          DebugText("R: \(geometryModel.roll)")
-            .debugTextStatus(status: model.isAcceptableRoll ? .passing : .failing)
-          DebugText("P: \(geometryModel.pitch)")
-            .debugTextStatus(status: model.isAcceptablePitch ? .passing : .failing)
-          DebugText("Y: \(geometryModel.yaw)")
-            .debugTextStatus(status: model.isAcceptableYaw ? .passing : .failing)
-        }
-        DebugSection(observation: model.faceQualityState) { qualityModel in
-          DebugText("Q: \(qualityModel.quality)")
-            .debugTextStatus(status: model.isAcceptableQuality ? .passing : .failing)
+        DebugSection(observation: model.faceGeometryState) { _ in
+          DebugText("Debug")
         }
       }
       .frame(maxWidth: .infinity, alignment: .leading)

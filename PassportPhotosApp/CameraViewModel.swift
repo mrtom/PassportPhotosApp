@@ -43,13 +43,9 @@ enum CameraViewModelAction {
   // Face detection actions
   case noFaceDetected
   case faceObservationDetected(FaceGeometryModel)
-  case faceQualityObservationDetected(FaceQualityModel)
 
   // Other
   case toggleDebugMode
-  case toggleHideBackgroundMode
-  case takePhoto
-  case savePhoto(UIImage)
 }
 
 enum FaceDetectedState {
@@ -68,13 +64,6 @@ enum FaceBoundsState {
 
 struct FaceGeometryModel {
   let boundingBox: CGRect
-  let roll: NSNumber
-  let pitch: NSNumber
-  let yaw: NSNumber
-}
-
-struct FaceQualityModel {
-  let quality: Float
 }
 
 final class CameraViewModel: ObservableObject {
@@ -85,32 +74,6 @@ final class CameraViewModel: ObservableObject {
 
   // MARK: - Publishers of derived state
   @Published private(set) var hasDetectedValidFace: Bool
-  @Published private(set) var isAcceptableRoll: Bool {
-    didSet {
-      calculateDetectedFaceValidity()
-    }
-  }
-  @Published private(set) var isAcceptablePitch: Bool {
-    didSet {
-      calculateDetectedFaceValidity()
-    }
-  }
-  @Published private(set) var isAcceptableYaw: Bool {
-    didSet {
-      calculateDetectedFaceValidity()
-    }
-  }
-  @Published private(set) var isAcceptableBounds: FaceBoundsState {
-    didSet {
-      calculateDetectedFaceValidity()
-    }
-  }
-  @Published private(set) var isAcceptableQuality: Bool {
-    didSet {
-      calculateDetectedFaceValidity()
-    }
-  }
-  @Published private(set) var passportPhoto: UIImage?
 
   // MARK: - Publishers of Vision data directly
   @Published private(set) var faceDetectedState: FaceDetectedState
@@ -120,26 +83,14 @@ final class CameraViewModel: ObservableObject {
     }
   }
 
-  @Published private(set) var faceQualityState: FaceObservation<FaceQualityModel> {
-    didSet {
-      processUpdatedFaceQuality()
-    }
-  }
-
   // MARK: - Private variables
   var faceLayoutGuideFrame = CGRect(x: 0, y: 0, width: 200, height: 300)
 
   init() {
     faceDetectedState = .noFaceDetected
-    isAcceptableRoll = false
-    isAcceptablePitch = false
-    isAcceptableYaw = false
-    isAcceptableBounds = .unknown
-    isAcceptableQuality = false
 
-    hasDetectedValidFace = false
+    hasDetectedValidFace = true
     faceGeometryState = .faceNotFound
-    faceQualityState = .faceNotFound
 
     #if DEBUG
       debugModeEnabled = true
@@ -159,16 +110,8 @@ final class CameraViewModel: ObservableObject {
       publishNoFaceObserved()
     case .faceObservationDetected(let faceObservation):
       publishFaceObservation(faceObservation)
-    case .faceQualityObservationDetected(let faceQualityObservation):
-      publishFaceQualityObservation(faceQualityObservation)
     case .toggleDebugMode:
       toggleDebugMode()
-    case .toggleHideBackgroundMode:
-      toggleHideBackgroundMode()
-    case .takePhoto:
-      takePhoto()
-    case .savePhoto(let image):
-      savePhoto(image)
     }
   }
 
@@ -187,7 +130,6 @@ final class CameraViewModel: ObservableObject {
     DispatchQueue.main.async { [self] in
       faceDetectedState = .noFaceDetected
       faceGeometryState = .faceNotFound
-      faceQualityState = .faceNotFound
     }
   }
 
@@ -198,42 +140,23 @@ final class CameraViewModel: ObservableObject {
     }
   }
 
-  private func publishFaceQualityObservation(_ faceQualityModel: FaceQualityModel) {
-    DispatchQueue.main.async { [self] in
-      faceDetectedState = .faceDetected
-      faceQualityState = .faceFound(faceQualityModel)
-    }
-  }
+  private func publishFaceQualityObservation() { }
 
   private func toggleDebugMode() {
     debugModeEnabled.toggle()
   }
 
-  private func toggleHideBackgroundMode() {
-    hideBackgroundModeEnabled.toggle()
-  }
+  private func toggleHideBackgroundMode() { }
 
-  private func takePhoto() {
-    shutterReleased = Impulse(value: true)
-  }
+  private func takePhoto() { }
 
-  private func savePhoto(_ photo: UIImage) {
-    UIImageWriteToSavedPhotosAlbum(photo, nil, nil, nil)
-    DispatchQueue.main.async { [self] in
-      passportPhoto = photo
-    }
-  }
+  private func savePhoto(_ photo: UIImage) { }
 }
 
 // MARK: Private instance methods
 
 extension CameraViewModel {
-  func invalidateFaceGeometryState() {
-    isAcceptableRoll = false
-    isAcceptablePitch = false
-    isAcceptableYaw = false
-    isAcceptableBounds = .unknown
-  }
+  func invalidateFaceGeometryState() { }
 
   func processUpdatedFaceGeometry() {
     switch faceGeometryState {
@@ -242,77 +165,18 @@ extension CameraViewModel {
     case .errored(let error):
       print(error.localizedDescription)
       invalidateFaceGeometryState()
-    case .faceFound(let faceGeometryModel):
-      let boundingBox = faceGeometryModel.boundingBox
-      let roll = faceGeometryModel.roll.doubleValue
-      let pitch = faceGeometryModel.pitch.doubleValue
-      let yaw = faceGeometryModel.yaw.doubleValue
-
-      updateAcceptableBounds(using: boundingBox)
-      updateAcceptableRollPitchYaw(using: roll, pitch: pitch, yaw: yaw)
+    case .faceFound(_):
+      return
     }
   }
 
-  func updateAcceptableBounds(using boundingBox: CGRect) {
-    // First, check face is roughly the same size as the layout guide
-    if boundingBox.width > 1.2 * faceLayoutGuideFrame.width {
-      isAcceptableBounds = .detectedFaceTooLarge
-    } else if boundingBox.width * 1.2 < faceLayoutGuideFrame.width {
-      isAcceptableBounds = .detectedFaceTooSmall
-    } else {
-      // Next, check face is roughly centered in the frame
-      if abs(boundingBox.midX - faceLayoutGuideFrame.midX) > 50 {
-        isAcceptableBounds = .detectedFaceOffCentre
-      } else if abs(boundingBox.midY - faceLayoutGuideFrame.midY) > 50 {
-        isAcceptableBounds = .detectedFaceOffCentre
-      } else {
-        isAcceptableBounds = .detectedFaceAppropriateSizeAndPosition
-      }
-    }
-  }
+  func updateAcceptableBounds(using boundingBox: CGRect) { }
 
-  func updateAcceptableRollPitchYaw(using roll: Double, pitch: Double, yaw: Double) {
-    if roll > 1.2 || roll < 1.6 {
-      isAcceptableRoll = true
-    } else {
-      isAcceptableRoll = false
-    }
+  func updateAcceptableRollPitchYaw(using roll: Double, pitch: Double, yaw: Double) { }
 
-    if abs(CGFloat(pitch)) < 0.2 {
-      isAcceptablePitch = true
-    } else {
-      isAcceptablePitch = false
-    }
-
-    if abs(CGFloat(yaw)) < 0.15 {
-      isAcceptableYaw = true
-    } else {
-      isAcceptableYaw = false
-    }
-  }
-
-  func processUpdatedFaceQuality() {
-    switch faceQualityState {
-    case .faceNotFound:
-      isAcceptableQuality = false
-    case .errored(let error):
-      print(error.localizedDescription)
-      isAcceptableQuality = false
-    case .faceFound(let faceQualityModel):
-      if faceQualityModel.quality < 0.2 {
-        isAcceptableQuality = false
-      }
-
-      isAcceptableQuality = true
-    }
-  }
+  func processUpdatedFaceQuality() { }
 
   func calculateDetectedFaceValidity() {
-    hasDetectedValidFace =
-    isAcceptableBounds == .detectedFaceAppropriateSizeAndPosition &&
-    isAcceptableRoll &&
-    isAcceptablePitch &&
-    isAcceptableYaw &&
-    isAcceptableQuality
+    hasDetectedValidFace = false
   }
 }

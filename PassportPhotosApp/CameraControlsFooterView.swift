@@ -51,7 +51,7 @@ struct CameraControlsFooterView: View {
         Spacer()
         VStack(spacing: 20) {
           HideBackgroundButton(isHideBackgroundEnabled: model.hideBackgroundModeEnabled) {
-            model.perform(action: .toggleHideBackgroundMode)
+            print("TODO")
           }
           DebugButton(isDebugEnabled: model.debugModeEnabled) {
             model.perform(action: .toggleDebugMode)
@@ -59,10 +59,10 @@ struct CameraControlsFooterView: View {
         }
         Spacer()
         ShutterButton(isDisabled: !model.hasDetectedValidFace) {
-          model.perform(action: .takePhoto)
+          print("TODO")
         }
         Spacer()
-        ThumbnailView(passportPhoto: model.passportPhoto)
+        ThumbnailView(passportPhoto: nil)
         Spacer()
       }
     }

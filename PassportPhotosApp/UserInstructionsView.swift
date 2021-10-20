@@ -53,16 +53,6 @@ extension UserInstructionsView {
     case .faceDetected:
       if model.hasDetectedValidFace {
         return "Please take your photo :]"
-      } else if model.isAcceptableBounds == .detectedFaceTooSmall {
-        return "Please bring your face closer to the camera"
-      } else if model.isAcceptableBounds == .detectedFaceTooLarge {
-        return "Please hold the camera further from your face"
-      } else if model.isAcceptableBounds == .detectedFaceOffCentre {
-        return "Please move your face to the centre of the frame"
-      } else if !model.isAcceptableRoll || !model.isAcceptablePitch || !model.isAcceptableYaw {
-        return "Please look straight at the camera"
-      } else if !model.isAcceptableQuality {
-        return "Image quality too low"
       } else {
         return "We cannot take your photo right now"
       }

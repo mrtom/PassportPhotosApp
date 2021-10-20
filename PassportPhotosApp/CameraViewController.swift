@@ -63,7 +63,6 @@ class CameraViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     faceDetector?.viewDelegate = self
-    configureMetal()
     configureCaptureSession()
 
     session.startRunning()
