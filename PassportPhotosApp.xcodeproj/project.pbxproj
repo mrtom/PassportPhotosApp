@@ -17,7 +17,6 @@
 		E226A16B271CD88F00ED4786 /* PassportPhotoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E226A16A271CD88F00ED4786 /* PassportPhotoView.swift */; };
 		E226A16D271EED2E00ED4786 /* FaceDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = E226A16C271EED2D00ED4786 /* FaceDetector.swift */; };
 		E226A16F271F0A5200ED4786 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E226A16E271F0A5200ED4786 /* CameraViewController.swift */; };
-		E226A17127200E2800ED4786 /* Impulse.swift in Sources */ = {isa = PBXBuildFile; fileRef = E226A17027200E2800ED4786 /* Impulse.swift */; };
 		E269537F270F86B7002BA294 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E269537E270F86B7002BA294 /* CameraView.swift */; };
 		E2695382270F9061002BA294 /* CameraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2695381270F9061002BA294 /* CameraViewModel.swift */; };
 		E2695384270F9225002BA294 /* FaceObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2695383270F9225002BA294 /* FaceObservation.swift */; };
@@ -42,7 +41,6 @@
 		E226A16A271CD88F00ED4786 /* PassportPhotoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassportPhotoView.swift; sourceTree = "<group>"; };
 		E226A16C271EED2D00ED4786 /* FaceDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceDetector.swift; sourceTree = "<group>"; };
 		E226A16E271F0A5200ED4786 /* CameraViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
-		E226A17027200E2800ED4786 /* Impulse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Impulse.swift; sourceTree = "<group>"; };
 		E269537E270F86B7002BA294 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		E2695381270F9061002BA294 /* CameraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewModel.swift; sourceTree = "<group>"; };
 		E2695383270F9225002BA294 /* FaceObservation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceObservation.swift; sourceTree = "<group>"; };
@@ -98,7 +96,6 @@
 				E226A16C271EED2D00ED4786 /* FaceDetector.swift */,
 				E226A1662715C53200ED4786 /* FaceLayoutGuideView.swift */,
 				E2695383270F9225002BA294 /* FaceObservation.swift */,
-				E226A17027200E2800ED4786 /* Impulse.swift */,
 				E269538F271024AD002BA294 /* LayoutGuideView.swift */,
 				18D775C422AD944300AE281E /* PassportPhotosAppView.swift */,
 				E226A16A271CD88F00ED4786 /* PassportPhotoView.swift */,
@@ -218,7 +215,6 @@
 				E226A16B271CD88F00ED4786 /* PassportPhotoView.swift in Sources */,
 				E2695390271024AD002BA294 /* LayoutGuideView.swift in Sources */,
 				18D775C522AD944300AE281E /* PassportPhotosAppView.swift in Sources */,
-				E226A17127200E2800ED4786 /* Impulse.swift in Sources */,
 				1839F4B025190F2A00BB00F1 /* AppMain.swift in Sources */,
 				E269538A271020B6002BA294 /* CameraOverlayView.swift in Sources */,
 				E2695386270F9810002BA294 /* DebugView.swift in Sources */,
