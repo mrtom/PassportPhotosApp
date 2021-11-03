@@ -45,13 +45,6 @@ class FaceDetector: NSObject {
   weak var viewDelegate: FaceDetectorDelegate?
   weak var model: CameraViewModel? {
     didSet {
-      model?.$hideBackgroundModeEnabled
-        .dropFirst()
-        .sink { hideBackgroundMode in
-          self.isReplacingBackground = hideBackgroundMode
-        }
-        .store(in: &subscriptions)
-
       model?.shutterReleased.sink { completion in
         switch completion {
         case .finished:
@@ -68,7 +61,6 @@ class FaceDetector: NSObject {
 
   var sequenceHandler = VNSequenceRequestHandler()
   var isCapturingPhoto = false
-  var isReplacingBackground = false
   var currentFrameBuffer: CVImageBuffer?
 
   var subscriptions = Set<AnyCancellable>()
@@ -79,10 +71,6 @@ class FaceDetector: NSObject {
     attributes: [],
     autoreleaseFrequency: .workItem
   )
-
-  func capturePhoto() {
-    isCapturingPhoto = true
-  }
 }
 
 // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate methods
@@ -107,7 +95,6 @@ extension FaceDetector: AVCaptureVideoDataOutputSampleBufferDelegate {
 
     let detectSegmentationRequest = VNGeneratePersonSegmentationRequest(completionHandler: detectedSegmentationRequest)
     detectSegmentationRequest.qualityLevel = .balanced
-    detectSegmentationRequest.outputPixelFormat = kCVPixelFormatType_OneComponent8
 
     currentFrameBuffer = imageBuffer
     do {
@@ -172,6 +159,7 @@ extension FaceDetector {
 
   func detectedSegmentationRequest(request: VNRequest, error: Error?) {
     guard
+      let model = model,
       let results = request.results as? [VNPixelBufferObservation],
       let result = results.first,
       let currentFrameBuffer = currentFrameBuffer
@@ -179,7 +167,7 @@ extension FaceDetector {
       return
     }
 
-    if isReplacingBackground {
+    if model.hideBackgroundModeEnabled {
       let originalImage = CIImage(cvImageBuffer: currentFrameBuffer)
       let maskPixelBuffer = result.pixelBuffer
       let outputImage = removeBackgroundFrom(image: originalImage, using: maskPixelBuffer)
@@ -199,10 +187,9 @@ extension FaceDetector {
       let originalImage = CIImage(cvPixelBuffer: pixelBuffer)
       var outputImage = originalImage
 
-      if isReplacingBackground {
+      if model.hideBackgroundModeEnabled {
         let detectSegmentationRequest = VNGeneratePersonSegmentationRequest()
         detectSegmentationRequest.qualityLevel = .accurate
-        detectSegmentationRequest.outputPixelFormat = kCVPixelFormatType_OneComponent8
 
         try? sequenceHandler.perform(
           [detectSegmentationRequest],
