@@ -51,7 +51,7 @@ struct CameraControlsFooterView: View {
         Spacer()
         VStack(spacing: 20) {
           HideBackgroundButton(isHideBackgroundEnabled: model.hideBackgroundModeEnabled) {
-            print("TODO")
+            model.perform(action: .toggleHideBackgroundMode)
           }
           DebugButton(isDebugEnabled: model.debugModeEnabled) {
             model.perform(action: .toggleDebugMode)

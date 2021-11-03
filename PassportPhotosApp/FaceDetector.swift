@@ -48,6 +48,8 @@ class FaceDetector: NSObject {
   var sequenceHandler = VNSequenceRequestHandler()
   var currentFrameBuffer: CVImageBuffer?
 
+  var subscriptions = Set<AnyCancellable>()
+
   let imageProcessingQueue = DispatchQueue(
     label: "Image Processing Queue",
     qos: .userInitiated,
@@ -65,7 +67,7 @@ extension FaceDetector: AVCaptureVideoDataOutputSampleBufferDelegate {
     }
 
     let detectFaceRectanglesRequest = VNDetectFaceRectanglesRequest(completionHandler: detectedFaceRectangles)
-    detectFaceRectanglesRequest.revision = VNDetectFaceRectanglesRequestRevision3
+    detectFaceRectanglesRequest.revision = VNDetectFaceRectanglesRequestRevision2
 
     currentFrameBuffer = imageBuffer
     do {

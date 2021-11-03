@@ -46,6 +46,7 @@ enum CameraViewModelAction {
 
   // Other
   case toggleDebugMode
+  case toggleHideBackgroundMode
 }
 
 enum FaceDetectedState {
@@ -114,6 +115,8 @@ final class CameraViewModel: ObservableObject {
       publishFaceObservation(faceObservation)
     case .toggleDebugMode:
       toggleDebugMode()
+    case .toggleHideBackgroundMode:
+      toggleHideBackgroundMode()
     }
   }
 
@@ -148,7 +151,9 @@ final class CameraViewModel: ObservableObject {
     debugModeEnabled.toggle()
   }
 
-  private func toggleHideBackgroundMode() { }
+  private func toggleHideBackgroundMode() {
+    hideBackgroundModeEnabled.toggle()
+  }
 
   private func takePhoto() { }
 
